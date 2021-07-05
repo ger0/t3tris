@@ -52,7 +52,7 @@ void initProgram(GLFWwindow* window) {
     glfwSetWindowSizeCallback(window, windowResizeCallback);
     glfwSetKeyCallback(window, keyCallback);
     // textures later on...
-    sp = new ShaderProgram("vshad.glsl", "fshad.glsl");
+    sp = new ShaderProgram("src/vshad.glsl", "src/fshad.glsl");
 }
 void freeProgram(GLFWwindow* window) {
     // free shaders etc.
