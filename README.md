@@ -1,7 +1,7 @@
 # T3TRIS
 
-HEAD
-A simple OpenGL game written in cpp using GLFW, GLEW and GLM libraries
+A simple OpenGL 3D game written in cpp using GLFW, GLEW and GLM libraries
+CGV assignment
 
 Building - just 
 ```make```

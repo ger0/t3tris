@@ -5,24 +5,23 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <stdlib.h>
 #include <stdio.h>
+#include <vector>
+#include <algorithm>
 
 #include "shaderprogram.hpp"
+#include "shape.hpp"
+#include "entity.hpp"
+#include "clock.hpp"
 
 float aspectRatio = 1;
 
-ShaderProgram *sp;
+int move = 0;
+int rotation = 0;
 
-int vertCount = 3;
-float verts[] = {
-    0.0f, 0.0f, 0.0f, 1.0f,
-    1.0f, 0.0f, 0.0f, 1.0f,
-    1.0f, 1.0f, 0.0f, 1.0f
-};
-float vertCol[] = {
-    1.0f, 0.0f, 0.0f, 1.0f,
-    0.0f, 1.0f, 0.0f, 1.0f,
-    0.0f, 0.0f, 1.0f, 1.0f
-};
+Entity *obj = NULL;
+std::vector<Entity*> ents;
+
+ShaderProgram *sp;
 
 // callbacks	-------------------------------------------------------
 void errCallback(int error, const char* description) {
@@ -36,6 +35,11 @@ void windowResizeCallback(GLFWwindow* window, int width, int height) {
 }
 void keyCallback(GLFWwindow* wnd, int key, int scancode, int act, int mod) {
     if (act == GLFW_PRESS) {
+	if (key == GLFW_KEY_Z)	rotation = -1;	
+	if (key == GLFW_KEY_UP)	rotation = 1;	
+
+	if (key == GLFW_KEY_LEFT)	move = -1;	
+	if (key == GLFW_KEY_RIGHT)	move = 1;	
     }
     if (act == GLFW_RELEASE) {
     }
@@ -62,25 +66,9 @@ void drawScene(GLFWwindow* window) {
     glClear(GL_COLOR_BUFFER_BIT);
     // z buffer will be needed later on
 
-    sp->use();
-
-    // set uniforms/ attributes
-    //glUniformMatrix4fv(sp->u("P"), 1, false, glm::value_ptr(P));
-    //glUniformMatrix4fv(sp->u("V"), 1, false, glm::value_ptr(V));
-
-    glEnableVertexAttribArray(sp->a("color"));
-    glVertexAttribPointer(sp->a("color"), 4, GL_FLOAT, false, 0, vertCol);
-
-    glEnableVertexAttribArray(sp->a("vertex"));
-    glVertexAttribPointer(sp->a("vertex"), 4, GL_FLOAT, false, 0, verts);
-
-    // draw
-    glDrawArrays(GL_TRIANGLES, 0, vertCount);
-
-    // disable attributes
-    glDisableVertexAttribArray(sp->a("color"));
-    glDisableVertexAttribArray(sp->a("vertex"));
-
+    for (Entity *obj : ents) {
+	obj->draw(window, sp);
+    }
     // swap buffers
     glfwSwapBuffers(window);
 }
@@ -108,11 +96,32 @@ int main() {
 	exit(EXIT_FAILURE);
     }
     initProgram(window);
+   
+    ents.push_back(new Entity(5, 5));
+    obj = ents[0];
     
+    glfwSetTime(0);
+    auto time_step = glfwGetTime();
     while (!glfwWindowShouldClose(window)) {
 	// main game loop
-	drawScene(window);
 	glfwPollEvents();
+	if (glfwGetTime() - time_step >= 0.05) {
+	    obj->update(move, rotation);	
+	    time_step = glfwGetTime();
+
+	    move = 0;
+	    rotation = 0;
+	}
+	if (glfwGetTime() >= 1) {
+	    if (!obj->tick()) {
+		Entity *temp = new Entity(5,5);
+		ents.push_back(temp);
+		obj = temp;
+	    }
+	    time_step = 0;
+	    glfwSetTime(0);
+	}
+	drawScene(window);
     }
 
     freeProgram(window);
