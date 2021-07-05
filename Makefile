@@ -1,6 +1,27 @@
-LIBS=-lGL -lglfw -lGLEW
-HEADERS=shaderprogram.hpp shape.hpp entity.hpp constants.hpp clock.hpp
-FILES=main.cpp shaderprogram.cpp entity.cpp
+CXX        = clang++
+MAIN_SOURCES    = src/main.cpp src/shaderprogram.cpp
+MAIN_OBJS    = $(MAIN_SOURCES:%.cpp=build/%.cpp.o)
+export CCFLAGS  = -g -Iinclude -I. -O0
+export CXXFLAGS = $(CCFLAGS)
+export LDLIBS	= -lGL -lglfw -lGLEW
 
-main_file: $(FILES) $(HEADERS)
-	g++ -o tetris $(FILES) $(LIBS) -I.
+.PHONY : run clean
+
+build : t3tris
+
+run : build
+	./t3tris
+
+rd : build
+	gdb -ex run ./t3tris
+
+t3tris : $(MAIN_OBJS)
+	$(CXX) $(CXX_FLAGS) $(LDLIBS) -o $@ $^ #add libs here
+
+build/%.cpp.o : %.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) $(LDLIBS) -MD -MP $< -c -o $@
+
+FORCE:
+
+-include $(MAIN_OBJS:.o=.d)

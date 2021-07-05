@@ -7,12 +7,9 @@
 
 #include "constants.hpp"
 #include "shaderprogram.hpp"
+#include "t3tris.hpp"
 
-struct Position {
-    int x;
-    int y;
-};
-
+// block cell for now, will be changed later on 
 class Entity {
 private:
     Position pos = {0, 0};
@@ -24,12 +21,12 @@ private:
     const float verts[4 * vertCount] = {
 	// first
 	-0.5f, -0.5f, 0.f, 1.f,
-	0.5f, -0.5f, 0.f, 1.f,
-	0.5f, 0.5f, 0.f, 1.f,
+	 0.5f, -0.5f, 0.f, 1.f,
+	 0.5f,  0.5f, 0.f, 1.f,
 	// second
 	-0.5f, -0.5f, 0.f, 1.f,
-	0.5f, 0.5f, 0.f, 1.f,
-	-0.5f, 0.5f, 0.f, 1.f
+	 0.5f, 	0.5f, 0.f, 1.f,
+	-0.5f, 	0.5f, 0.f, 1.f
     };
     const float vertCol[4 * vertCount] = {
 	1.f, 1.f, 1.f, 1.f,

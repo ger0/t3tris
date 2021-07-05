@@ -11,15 +11,12 @@
 #include "shaderprogram.hpp"
 #include "shape.hpp"
 #include "entity.hpp"
-#include "clock.hpp"
+#include "t3tris.hpp"
 
 float aspectRatio = 1;
 
 int move = 0;
 int rotation = 0;
-
-Entity *obj = NULL;
-std::vector<Entity*> ents;
 
 ShaderProgram *sp;
 
@@ -65,10 +62,6 @@ void freeProgram(GLFWwindow* window) {
 void drawScene(GLFWwindow* window) {
     glClear(GL_COLOR_BUFFER_BIT);
     // z buffer will be needed later on
-
-    for (Entity *obj : ents) {
-	obj->draw(window, sp);
-    }
     // swap buffers
     glfwSwapBuffers(window);
 }
@@ -97,27 +90,18 @@ int main() {
     }
     initProgram(window);
    
-    ents.push_back(new Entity(5, 5));
-    obj = ents[0];
-    
-    glfwSetTime(0);
     auto time_step = glfwGetTime();
+    
+    // main game loop
     while (!glfwWindowShouldClose(window)) {
-	// main game loop
 	glfwPollEvents();
 	if (glfwGetTime() - time_step >= 0.05) {
-	    obj->update(move, rotation);	
 	    time_step = glfwGetTime();
 
 	    move = 0;
 	    rotation = 0;
 	}
 	if (glfwGetTime() >= 1) {
-	    if (!obj->tick()) {
-		Entity *temp = new Entity(5,5);
-		ents.push_back(temp);
-		obj = temp;
-	    }
 	    time_step = 0;
 	    glfwSetTime(0);
 	}
