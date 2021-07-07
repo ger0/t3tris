@@ -10,13 +10,16 @@
 
 #include "shaderprogram.hpp"
 #include "shape.hpp"
-#include "entity.hpp"
+#include "board.hpp"
 #include "t3tris.hpp"
 
 float aspectRatio = 1;
 
 int move = 0;
+int hmov = 0;
 int rotation = 0;
+
+int grid[BND_SIZE * BND_SIZE];
 
 ShaderProgram *sp;
 
@@ -35,8 +38,11 @@ void keyCallback(GLFWwindow* wnd, int key, int scancode, int act, int mod) {
 	if (key == GLFW_KEY_Z)	rotation = -1;	
 	if (key == GLFW_KEY_UP)	rotation = 1;	
 
-	if (key == GLFW_KEY_LEFT)	move = -1;	
-	if (key == GLFW_KEY_RIGHT)	move = 1;	
+	if (key == GLFW_KEY_LEFT)	move += -1;	
+	if (key == GLFW_KEY_RIGHT)	move += 1;	
+
+	if (key == GLFW_KEY_UP)		hmov += 1;	
+	if (key == GLFW_KEY_DOWN)	hmov += -1;	
     }
     if (act == GLFW_RELEASE) {
     }
@@ -62,6 +68,9 @@ void freeProgram(GLFWwindow* window) {
 void drawScene(GLFWwindow* window) {
     glClear(GL_COLOR_BUFFER_BIT);
     // z buffer will be needed later on
+
+    drawGrid(window, sp, grid, {0 + move, 0 + hmov});
+
     // swap buffers
     glfwSwapBuffers(window);
 }
@@ -73,7 +82,7 @@ int main() {
 	exit(EXIT_FAILURE);
     }
 
-    window = glfwCreateWindow(800, 800, "Tetris", NULL, NULL);
+    window = glfwCreateWindow(WND_WIDTH, WND_HEIGHT, "Tetris", NULL, NULL);
     if (!window) {
 	fprintf(stderr, "Cannot create window.\n");
 	glfwTerminate();
@@ -82,7 +91,7 @@ int main() {
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
-    glViewport(0,0,800,800);
+    glViewport(0,0,WND_WIDTH,WND_HEIGHT);
 
     if (glewInit() != GLEW_OK) {
 	fprintf(stderr, "Cannot initialise GLEW.\n");
@@ -91,14 +100,17 @@ int main() {
     initProgram(window);
    
     auto time_step = glfwGetTime();
-    
+
+    //memcpy(grid, t_types::O, 25 * (sizeof(int)));
+    grid[0] = 1;
+    grid[24] = 1;
     // main game loop
     while (!glfwWindowShouldClose(window)) {
 	glfwPollEvents();
 	if (glfwGetTime() - time_step >= 0.05) {
 	    time_step = glfwGetTime();
 
-	    move = 0;
+	    //move = 0;
 	    rotation = 0;
 	}
 	if (glfwGetTime() >= 1) {

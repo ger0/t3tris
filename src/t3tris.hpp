@@ -1,8 +1,14 @@
 #pragma once
 
+// default window size
+#define WND_WIDTH	500
+#define WND_HEIGHT	1000
+
 // map definitions
 #define MAP_WIDTH 10
-#define MAP_HEIGH 20
+#define MAP_HEIGHT 20
+
+#define PI 3.141592653589793
 
 // tetromino boundary 
 #define BND_SIZE 5
@@ -14,7 +20,7 @@ struct Position {
 };
 
 // different shapes for tetrominos
-enum TET_TYPE {
+enum T_type {
     O,
     I,
     L,
@@ -23,9 +29,13 @@ enum TET_TYPE {
     Z,
     T
 };
-
+// stores information about tetrominos during gameplay
+struct tetromino {
+    T_type	type;
+    int		data[BND_SIZE * BND_SIZE];	
+};
 // 1 - cell, 2 - center of rotation
-namespace tetromino {
+namespace t_types {
     // O shape shouldn't rotate at all
     const int O[BND_SIZE * BND_SIZE] = {
 	0, 0, 0, 0, 0,
@@ -43,37 +53,37 @@ namespace tetromino {
     };
     const int L[BND_SIZE * BND_SIZE] = {
 	0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0,
 	0, 0, 1, 0, 0,
 	1, 1, 2, 0, 0,
-	0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0
     };
     const int J[BND_SIZE * BND_SIZE] = {
 	0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0,
 	0, 0, 1, 0, 0,
 	0, 0, 2, 1, 1,
-	0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0
-    };
-    const int S[BND_SIZE * BND_SIZE] = {
-	0, 0, 0, 0, 0,
-	0, 1, 0, 0, 0,
-	0, 1, 2, 0, 0,
-	0, 0, 1, 0, 0,
 	0, 0, 0, 0, 0
     };
     const int Z[BND_SIZE * BND_SIZE] = {
 	0, 0, 0, 0, 0,
-	0, 0, 0, 1, 0,
-	0, 0, 2, 1, 0,
 	0, 0, 1, 0, 0,
+	0, 1, 2, 0, 0,
+	0, 1, 0, 0, 0,
+	0, 0, 0, 0, 0
+    };
+    const int S[BND_SIZE * BND_SIZE] = {
+	0, 0, 0, 0, 0,
+	0, 0, 1, 0, 0,
+	0, 0, 2, 1, 0,
+	0, 0, 0, 1, 0,
 	0, 0, 0, 0, 0
     };
     const int T[BND_SIZE * BND_SIZE] = {
 	0, 0, 0, 0, 0,
-	0, 0, 1, 0, 0,
-	0, 1, 2, 0, 0,
 	0, 0, 0, 0, 0,
+	0, 0, 1, 0, 0,
+	0, 1, 2, 1, 0,
 	0, 0, 0, 0, 0
     };
 }
