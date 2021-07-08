@@ -35,6 +35,7 @@ struct tetromino {
     int		data[BND_SIZE * BND_SIZE];	
 };
 // 1 - cell, 2 - center of rotation
+// Will be removed later on
 namespace t_types {
     // O shape shouldn't rotate at all
     const int O[BND_SIZE * BND_SIZE] = {

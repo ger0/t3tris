@@ -1,5 +1,5 @@
 CXX=clang++
-MAIN_SOURCES=src/main.cpp src/shaderprogram.cpp
+MAIN_SOURCES=src/main.cpp src/shaderprogram.cpp src/board.cpp
 MAIN_OBJS=$(MAIN_SOURCES:%.cpp=build/%.cpp.o)
 CCFLAGS=-g -Iinclude -I. -O0
 CXXFLAGS=$(CCFLAGS)
