@@ -14,14 +14,14 @@ bool map::chkCollision(tetromino &tet) {
     return false;
 }
 
-void drawGrid(GLFWwindow *window, ShaderProgram *sp, int grid[],
-		Position pos) {
+void drawGrid(GLFWwindow *window, ShaderProgram *sp, unsigned char grid[],
+		Position pos, int rot) {
     float x_shift = (MAP_WIDTH - 1) / 2.0f;
     float y_shift = (MAP_HEIGHT - 1) / 2.0f;
 
     for (int y = 0; y < BND_SIZE; y++) {
 	for (int x = 0; x < BND_SIZE; x++) {
-	    if (grid[y * BND_SIZE + x] != 0) {
+	    if (((grid[y * BND_SIZE + x] >> rot) & 1) != 0) {
 		sp->use();
 
 		glm::mat4 M = glm::mat4(1.f);

@@ -18,4 +18,4 @@ namespace map {
 //Position rotate(int grid[], int size, float angle);
 
 void drawGrid(GLFWwindow *window, ShaderProgram *sp, 
-		int grid[], Position pos);
+		unsigned char grid[], Position pos, int rot);

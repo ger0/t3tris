@@ -19,7 +19,7 @@ int move = 0;
 int hmov = 0;
 int rotation = 0;
 
-int grid[BND_SIZE * BND_SIZE];
+unsigned char grid[BND_SIZE * BND_SIZE];
 
 ShaderProgram *sp;
 
@@ -35,13 +35,13 @@ void windowResizeCallback(GLFWwindow* window, int width, int height) {
 }
 void keyCallback(GLFWwindow* wnd, int key, int scancode, int act, int mod) {
     if (act == GLFW_PRESS) {
-	if (key == GLFW_KEY_Z)	rotation = -1;	
-	if (key == GLFW_KEY_UP)	rotation = 1;	
+	if (key == GLFW_KEY_Z)	rotation = unsigned(rotation - 1) % 4;	
+	if (key == GLFW_KEY_UP)	rotation = (rotation + 1) % 4;	
 
 	if (key == GLFW_KEY_LEFT)	move += -1;	
 	if (key == GLFW_KEY_RIGHT)	move += 1;	
 
-	if (key == GLFW_KEY_UP)		hmov += 1;	
+	//if (key == GLFW_KEY_UP)		hmov += 1;	
 	if (key == GLFW_KEY_DOWN)	hmov += -1;	
     }
     if (act == GLFW_RELEASE) {
@@ -69,7 +69,7 @@ void drawScene(GLFWwindow* window) {
     glClear(GL_COLOR_BUFFER_BIT);
     // z buffer will be needed later on
 
-    drawGrid(window, sp, grid, {0 + move, 0 + hmov});
+    drawGrid(window, sp, grid, {0 + move, 0 + hmov}, rotation);
 
     // swap buffers
     glfwSwapBuffers(window);
@@ -101,17 +101,15 @@ int main() {
    
     auto time_step = glfwGetTime();
 
-    //memcpy(grid, t_types::O, 25 * (sizeof(int)));
-    grid[0] = 1;
-    grid[24] = 1;
+    memcpy(grid, t_types::Z, 16);
     // main game loop
     while (!glfwWindowShouldClose(window)) {
 	glfwPollEvents();
 	if (glfwGetTime() - time_step >= 0.05) {
 	    time_step = glfwGetTime();
 
+
 	    //move = 0;
-	    rotation = 0;
 	}
 	if (glfwGetTime() >= 1) {
 	    time_step = 0;
