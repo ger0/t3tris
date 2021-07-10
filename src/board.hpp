@@ -12,7 +12,8 @@
 
 namespace map {
     extern byte data[MAP_WIDTH * MAP_HEIGHT];
-    bool	chkCollision(Tetromino &tet);
+    void	initMap();
+    void	chkCollision(Tetromino &tet, Position mov, int rot);
     void	pushPiece(Tetromino &tet);
 }
 

@@ -44,14 +44,12 @@ void windowResizeCallback(GLFWwindow* window, int width, int height) {
 void keyCallback(GLFWwindow* wnd, int key, int scancode, int act, int mod) {
     if (act == GLFW_PRESS) {
 	// rotation
-	if (key == GLFW_KEY_Z) {
-	    map::chkCollision(curr_piece, {0, 0}, -1);
-	}
+	if (key == GLFW_KEY_Z)	
 	    //curr_piece.rot = unsigned(curr_piece.rot - 1) % 4;	
-	if (key == GLFW_KEY_UP)	{
-	    map::chkCollision(curr_piece, {0, 0}, 1);
-	}
+	    map::chkCollision(curr_piece, {0, 0}, -1);
+	if (key == GLFW_KEY_UP)	
 	    //curr_piece.rot = (curr_piece.rot + 1) % 4;	
+	    map::chkCollision(curr_piece, {0, 0}, -1);
 
 	// position
 	if (key == GLFW_KEY_LEFT)
@@ -83,7 +81,6 @@ void initProgram(GLFWwindow* window) {
     glfwSetKeyCallback(window, keyCallback);
     // textures later on...
     sp = new ShaderProgram("src/vshad.glsl", "src/fshad.glsl");
-    map::initMap();
 }
 void freeProgram(GLFWwindow* window) {
     // free shaders etc.
