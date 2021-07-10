@@ -23,11 +23,13 @@ ShaderProgram *sp;
 Tetromino curr_piece;
 Tetromino next_piece;
 
-void setPiece(Tetromino &piece) {
+void setPieces() {
+    curr_piece = next_piece;
+
     unsigned var = rand() % PIECES;
-    piece.type = T_type(var);
-    memcpy(piece.data, t_types + BND_AREA * var, BND_AREA);
-    printf("%i\n", piece.type);
+    next_piece.type = T_type(var);
+    memcpy(next_piece.data, t_types + BND_AREA * var, BND_AREA);
+    printf("%i\n", next_piece.type);
 }
 
 // callbacks	-------------------------------------------------------
@@ -41,18 +43,26 @@ void windowResizeCallback(GLFWwindow* window, int width, int height) {
 }
 void keyCallback(GLFWwindow* wnd, int key, int scancode, int act, int mod) {
     if (act == GLFW_PRESS) {
-	if (key == GLFW_KEY_Z)	rotation = unsigned(rotation - 1) % 4;	
-	if (key == GLFW_KEY_UP)	rotation = (rotation + 1) % 4;	
+	// rotation
+	if (key == GLFW_KEY_Z)	
+	    curr_piece.rot = unsigned(curr_piece.rot - 1) % 4;	
+	if (key == GLFW_KEY_UP)	
+	    curr_piece.rot = (curr_piece.rot + 1) % 4;	
 
+	// position
+	if (key == GLFW_KEY_LEFT)
+	    curr_piece.pos.x += -1;	
+	if (key == GLFW_KEY_RIGHT)
+	    curr_piece.pos.x += 1;	
+	if (key == GLFW_KEY_DOWN)
+	    curr_piece.pos.y += -1;	
+	
+	// set piece
 	if (key == GLFW_KEY_ENTER) {
-	    setPiece(curr_piece);
+	    map::pushPiece(curr_piece);
+	    setPieces();
 	}
 
-	if (key == GLFW_KEY_LEFT)	move += -1;	
-	if (key == GLFW_KEY_RIGHT)	move += 1;	
-
-	//if (key == GLFW_KEY_UP)		hmov += 1;	
-	if (key == GLFW_KEY_DOWN)	hmov += -1;	
     }
     if (act == GLFW_RELEASE) {
     }
@@ -79,7 +89,11 @@ void drawScene(GLFWwindow* window) {
     glClear(GL_COLOR_BUFFER_BIT);
     // z buffer will be needed later on
 
-    drawGrid(window, sp, curr_piece.data, {0 + move, 0 + hmov}, rotation);
+    drawGrid(window, sp, map::data, {0, 0}, 0,
+	    {MAP_WIDTH, MAP_HEIGHT});
+
+    drawGrid(window, sp, curr_piece.data, curr_piece.pos, curr_piece.rot,
+	    {BND_SIZE, BND_SIZE});
 
     // swap buffers
     glfwSwapBuffers(window);
@@ -113,6 +127,10 @@ int main() {
    
     auto time_step = glfwGetTime();
 
+    // lol
+    setPieces();
+    setPieces();
+
     // main game loop
     while (!glfwWindowShouldClose(window)) {
 	glfwPollEvents();
@@ -123,6 +141,7 @@ int main() {
 	}
 	if (glfwGetTime() >= 1) {
 	    time_step = 0;
+
 	    glfwSetTime(0);
 	}
 	drawScene(window);

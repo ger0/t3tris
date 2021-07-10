@@ -11,11 +11,11 @@
 #include "shaderprogram.hpp"
 
 namespace map {
-    extern int	board[MAP_WIDTH * MAP_HEIGHT];
+    extern byte data[MAP_WIDTH * MAP_HEIGHT];
     bool	chkCollision(Tetromino &tet);
+    void	pushPiece(Tetromino &tet);
 }
 
-//Position rotate(int grid[], int size, float angle);
-
-void drawGrid(GLFWwindow *window, ShaderProgram *sp, 
-		unsigned char grid[], Position pos, int rot);
+// draws a grid of dim dimensions
+void drawGrid(GLFWwindow *wnd, ShaderProgram *sp, 
+		byte grid[], Position pos, int rot, Position dim);

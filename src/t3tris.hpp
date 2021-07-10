@@ -15,6 +15,8 @@
 #define BND_AREA 16
 #define PIECES 7
 
+typedef unsigned char byte;
+
 // position on the map 
 struct Position {
     int x;
@@ -33,12 +35,14 @@ enum T_type {
 };
 // stores information about tetrominos during gameplay
 struct Tetromino {
-    T_type		type;
-    unsigned char	data[BND_AREA];	
+    T_type	type;
+    Position	pos;
+    int		rot;
+    byte	data[BND_AREA];	
 };
 // 4 bits are used - 1 bit for every rotation 
 // Will be removed later on
-const unsigned char t_types[PIECES * BND_AREA] = {
+const byte t_types[PIECES * BND_AREA] = {
     // O shape
 	0, 0,  0,  0,
 	0, 15, 15, 0,
