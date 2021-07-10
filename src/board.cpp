@@ -2,7 +2,7 @@
 
 int map::board[MAP_WIDTH * MAP_HEIGHT] = {0};
 
-bool map::chkCollision(tetromino &tet) { 
+bool map::chkCollision(Tetromino &tet) { 
     for (unsigned y = 0; y < MAP_HEIGHT; y++) {
 	for (unsigned x = 0; x < MAP_WIDTH; x++) {
 	    if (tet.data[MAP_HEIGHT * y + x] != 0 

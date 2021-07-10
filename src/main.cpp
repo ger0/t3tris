@@ -7,21 +7,28 @@
 #include <stdio.h>
 #include <vector>
 #include <algorithm>
+#include <time.h>
 
 #include "shaderprogram.hpp"
 #include "shape.hpp"
 #include "board.hpp"
 #include "t3tris.hpp"
 
-float aspectRatio = 1;
-
 int move = 0;
 int hmov = 0;
 int rotation = 0;
 
-unsigned char grid[BND_SIZE * BND_SIZE];
-
 ShaderProgram *sp;
+
+Tetromino curr_piece;
+Tetromino next_piece;
+
+void setPiece(Tetromino &piece) {
+    unsigned var = rand() % PIECES;
+    piece.type = T_type(var);
+    memcpy(piece.data, t_types + BND_AREA * var, BND_AREA);
+    printf("%i\n", piece.type);
+}
 
 // callbacks	-------------------------------------------------------
 void errCallback(int error, const char* description) {
@@ -30,13 +37,16 @@ void errCallback(int error, const char* description) {
 void windowResizeCallback(GLFWwindow* window, int width, int height) {
     if (height == 0)
 	return;
-    float aspectRatio = (float)width / float(height);
     glViewport(0, 0, width, height);
 }
 void keyCallback(GLFWwindow* wnd, int key, int scancode, int act, int mod) {
     if (act == GLFW_PRESS) {
 	if (key == GLFW_KEY_Z)	rotation = unsigned(rotation - 1) % 4;	
 	if (key == GLFW_KEY_UP)	rotation = (rotation + 1) % 4;	
+
+	if (key == GLFW_KEY_ENTER) {
+	    setPiece(curr_piece);
+	}
 
 	if (key == GLFW_KEY_LEFT)	move += -1;	
 	if (key == GLFW_KEY_RIGHT)	move += 1;	
@@ -69,12 +79,14 @@ void drawScene(GLFWwindow* window) {
     glClear(GL_COLOR_BUFFER_BIT);
     // z buffer will be needed later on
 
-    drawGrid(window, sp, grid, {0 + move, 0 + hmov}, rotation);
+    drawGrid(window, sp, curr_piece.data, {0 + move, 0 + hmov}, rotation);
 
     // swap buffers
     glfwSwapBuffers(window);
 }
 int main() {
+    srand(time(NULL));
+
     GLFWwindow* window;
     glfwSetErrorCallback(errCallback);
     if (!glfwInit()) {
@@ -101,14 +113,12 @@ int main() {
    
     auto time_step = glfwGetTime();
 
-    memcpy(grid, t_types::Z, 16);
     // main game loop
     while (!glfwWindowShouldClose(window)) {
 	glfwPollEvents();
 	if (glfwGetTime() - time_step >= 0.05) {
 	    time_step = glfwGetTime();
-
-
+	    
 	    //move = 0;
 	}
 	if (glfwGetTime() >= 1) {

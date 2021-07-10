@@ -12,7 +12,7 @@
 
 namespace map {
     extern int	board[MAP_WIDTH * MAP_HEIGHT];
-    bool	chkCollision(tetromino &tet);
+    bool	chkCollision(Tetromino &tet);
 }
 
 //Position rotate(int grid[], int size, float angle);
