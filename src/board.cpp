@@ -8,6 +8,9 @@ void map::initMap() {
 	    map::data[i * MAP_WIDTH] = 15;
 	    map::data[i * MAP_WIDTH + MAP_WIDTH - 1] = 15;
 	}
+	for (unsigned i = 0; i < MAP_WIDTH; i++) {
+	    map::data[i + MAP_WIDTH * (MAP_HEIGHT - 1)] = 15;
+	}
     }
 }
 
@@ -19,8 +22,7 @@ inline bool chkBND(Tetromino &tet, unsigned &x, unsigned &y, int rot = 0) {
 	return false;
 }
 
-void map::chkCollision(Tetromino &tet, Position mov, int rot) { 
-    bool isPossible = true;
+bool map::chkCollision(Tetromino &tet, Position mov, int rot) { 
     for (unsigned y = 0; y < BND_SIZE; y++) {
 	for (unsigned x = 0; x < BND_SIZE; x++) {
 	    if (chkBND(tet, x, y, rot)) {
@@ -31,17 +33,16 @@ void map::chkCollision(Tetromino &tet, Position mov, int rot) {
 		    //
 		    printf("Collision at: %i\n", (y - (tet.pos.y + mov.y)) * MAP_WIDTH 
 				    + (x + (tet.pos.x + mov.x)));
-		    isPossible = false;
+		    return true;
 		}
 	    }
 	}
     }
-    if (isPossible) {
-	tet.pos.x += mov.x;
-	tet.pos.y += mov.y;
-	if (rot)
-	    tet.rot = unsigned(tet.rot + rot) % 4;
-    }
+    tet.pos.x += mov.x;
+    tet.pos.y += mov.y;
+    if (rot)
+	tet.rot = unsigned(tet.rot + rot) % 4;
+    return false;
 }
 
 void map::pushPiece(Tetromino &tet) {

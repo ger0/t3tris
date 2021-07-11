@@ -14,10 +14,6 @@
 #include "board.hpp"
 #include "t3tris.hpp"
 
-int move = 0;
-int hmov = 0;
-int rotation = 0;
-
 ShaderProgram *sp;
 
 Tetromino curr_piece;
@@ -29,6 +25,7 @@ void setPieces() {
     unsigned var = rand() % PIECES;
     next_piece.type = T_type(var);
     memcpy(next_piece.data, t_types + BND_AREA * var, BND_AREA);
+    next_piece.pos = {(MAP_WIDTH - 1) / 2, 1};
     printf("%i\n", next_piece.type);
 }
 
@@ -44,14 +41,10 @@ void windowResizeCallback(GLFWwindow* window, int width, int height) {
 void keyCallback(GLFWwindow* wnd, int key, int scancode, int act, int mod) {
     if (act == GLFW_PRESS) {
 	// rotation
-	if (key == GLFW_KEY_Z) {
+	if (key == GLFW_KEY_Z)
 	    map::chkCollision(curr_piece, {0, 0}, -1);
-	}
-	    //curr_piece.rot = unsigned(curr_piece.rot - 1) % 4;	
-	if (key == GLFW_KEY_UP)	{
+	if (key == GLFW_KEY_UP)
 	    map::chkCollision(curr_piece, {0, 0}, 1);
-	}
-	    //curr_piece.rot = (curr_piece.rot + 1) % 4;	
 
 	// position
 	if (key == GLFW_KEY_LEFT)
@@ -60,13 +53,13 @@ void keyCallback(GLFWwindow* wnd, int key, int scancode, int act, int mod) {
 	    map::chkCollision(curr_piece, {1, 0}, 0);
 	if (key == GLFW_KEY_DOWN)
 	    map::chkCollision(curr_piece, {0, -1}, 0);
-	
-	// set piece
+	// debug
+	/*
 	if (key == GLFW_KEY_ENTER) {
 	    map::pushPiece(curr_piece);
 	    setPieces();
 	}
-
+	*/
     }
     if (act == GLFW_RELEASE) {
     }
@@ -133,26 +126,31 @@ int main() {
     auto time_step = glfwGetTime();
 
     // lol
+    int temp = 0;
     setPieces();
     setPieces();
 
     // main game loop
     while (!glfwWindowShouldClose(window)) {
 	glfwPollEvents();
-	if (glfwGetTime() - time_step >= 0.05) {
+	if (glfwGetTime() - time_step >= 0.10) {
 	    time_step = glfwGetTime();
-	    
-	    //move = 0;
 	}
 	if (glfwGetTime() >= 0.75) {
 	    time_step = 0;
 
-	     
+	    if (temp == 1) {
+		map::pushPiece(curr_piece);
+		setPieces();
+		temp = 0;
+	    }
+	    if (map::chkCollision(curr_piece, {0, -1}, 0)) {
+		temp++;
+	    }
 	    glfwSetTime(0);
 	}
 	drawScene(window);
     }
-
     freeProgram(window);
     glfwDestroyWindow(window);
     glfwTerminate();

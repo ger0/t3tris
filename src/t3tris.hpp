@@ -5,8 +5,8 @@
 #define WND_HEIGHT	1000
 
 // map definitions
-#define MAP_WIDTH 10
-#define MAP_HEIGHT 20
+#define MAP_WIDTH	10
+#define MAP_HEIGHT	20
 
 #define PI 3.141592653589793
 
