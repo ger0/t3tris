@@ -19,6 +19,7 @@ ShaderProgram *sp;
 Tetromino curr_piece;
 Tetromino next_piece;
 
+// td move outside main
 void setPieces() {
     curr_piece = next_piece;
 
@@ -28,7 +29,6 @@ void setPieces() {
     next_piece.pos = {(MAP_WIDTH - 1) / 2, 1};
     printf("%i\n", next_piece.type);
 }
-
 // callbacks	-------------------------------------------------------
 void errCallback(int error, const char* description) {
 	fputs(description, stderr);
@@ -55,6 +55,12 @@ void keyCallback(GLFWwindow* wnd, int key, int scancode, int act, int mod) {
 	    map::chkCollision(curr_piece, {1, 0}, 0);
 	if (key == GLFW_KEY_DOWN)
 	    map::chkCollision(curr_piece, {0, -1}, 0);
+	// hard drop
+	if (key == GLFW_KEY_SPACE) {
+	    while (!map::chkCollision(curr_piece, {0, -1}, 0));
+	    map::pushPiece(curr_piece);
+	    setPieces();
+	}
 	// debug
 	/*
 	if (key == GLFW_KEY_ENTER) {
@@ -89,11 +95,8 @@ void drawScene(GLFWwindow* window) {
     glClear(GL_COLOR_BUFFER_BIT);
     // z buffer will be needed later on
 
-    drawGrid(window, sp, map::data, {0, 0}, 0,
-	    {MAP_WIDTH, MAP_HEIGHT});
-
-    drawGrid(window, sp, curr_piece.data, curr_piece.pos, curr_piece.rot,
-	    {BND_SIZE, BND_SIZE});
+    drawGrid(window, sp, map::data, {0, 0});
+    drawGrid(window, sp, curr_piece);
 
     // swap buffers
     glfwSwapBuffers(window);

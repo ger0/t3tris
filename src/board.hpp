@@ -19,4 +19,6 @@ namespace map {
 
 // draws a grid of dim dimensions
 void drawGrid(GLFWwindow *wnd, ShaderProgram *sp, 
-		byte grid[], Position pos, int rot, Position dim);
+		byte grid[], Position pos);
+
+void drawGrid(GLFWwindow *wnd, ShaderProgram *sp, Tetromino &tet);
