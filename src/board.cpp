@@ -15,7 +15,7 @@ void map::initMap() {
 }
 
 inline bool chkBND(Tetromino &tet, unsigned &x, unsigned &y, int rot = 0) {
-    if ((tet.data[y * BND_SIZE + x] >> unsigned((tet.rot + rot) % 4)) & 1) {
+    if ((tet.data[y * BND_SIZE + x] >> unsigned(tet.rot + rot) % 4) & 1) {
 	return true;
     }
     else 
@@ -26,13 +26,9 @@ bool map::chkCollision(Tetromino &tet, Position mov, int rot) {
     for (unsigned y = 0; y < BND_SIZE; y++) {
 	for (unsigned x = 0; x < BND_SIZE; x++) {
 	    if (chkBND(tet, x, y, rot)) {
-
 		int coord = (y - (tet.pos.y + mov.y)) * MAP_WIDTH 
 				+ x + tet.pos.x + mov.x;
 		if (map::data[coord] != 0) {
-		    //
-		    printf("Collision at: %i\n", (y - (tet.pos.y + mov.y)) * MAP_WIDTH 
-				    + (x + (tet.pos.x + mov.x)));
 		    return true;
 		}
 	    }

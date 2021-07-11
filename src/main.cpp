@@ -45,6 +45,8 @@ void keyCallback(GLFWwindow* wnd, int key, int scancode, int act, int mod) {
 	    map::chkCollision(curr_piece, {0, 0}, -1);
 	if (key == GLFW_KEY_UP)
 	    map::chkCollision(curr_piece, {0, 0}, 1);
+	if (key == GLFW_KEY_A)
+	    map::chkCollision(curr_piece, {0, 0}, 2);
 
 	// position
 	if (key == GLFW_KEY_LEFT)
