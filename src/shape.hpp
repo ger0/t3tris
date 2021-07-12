@@ -21,3 +21,13 @@ const float vertCol[4 * vertCount] = {
     1.f, 1.f, 1.f, 1.f,
     1.f, 1.f, 1.f, 1.f
 };
+const float texCoords[2 * vertCount] = {
+    // first
+     0.0f,  0.0f,
+     1.0f,  0.0f,
+     1.0f,  1.0f,
+    // second
+     0.0f,  0.0f,
+     1.0f,  1.0f,
+     0.0f,  1.0f
+};

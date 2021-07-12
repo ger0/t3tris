@@ -8,13 +8,15 @@
 #include <vector>
 #include <algorithm>
 #include <time.h>
+#include "lodepng/lodepng.h"
 
 #include "shaderprogram.hpp"
 #include "shape.hpp"
 #include "board.hpp"
 #include "t3tris.hpp"
 
-ShaderProgram *sp;
+ShaderProgram	*sp;
+GLuint		tex;
 
 Tetromino curr_piece;
 Tetromino next_piece;
@@ -72,6 +74,28 @@ void keyCallback(GLFWwindow* wnd, int key, int scancode, int act, int mod) {
     if (act == GLFW_RELEASE) {
     }
 }
+GLuint readTexture(const char* filename) {
+    GLuint tex0;
+    glActiveTexture(GL_TEXTURE0);
+
+    std::vector<byte> image;
+    unsigned width, height;
+    unsigned error = lodepng::decode(image, width, height, filename);
+    if (error) {
+	printf("Texture loading error: %u\n", error);
+    }
+
+    glGenTextures(1, &tex0);
+    glBindTexture(GL_TEXTURE_2D, tex0);
+    glTexImage2D(GL_TEXTURE_2D, 0, 4, width, height, 0, 
+	    GL_RGBA, GL_UNSIGNED_BYTE, (byte*)image.data());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    return tex0;
+}
 // --------------------------------------------------------------------
 void initProgram(GLFWwindow* window) {
     // initialise the program
@@ -82,11 +106,11 @@ void initProgram(GLFWwindow* window) {
 
     glfwSetWindowSizeCallback(window, windowResizeCallback);
     glfwSetKeyCallback(window, keyCallback);
-    // textures later on...
+    tex = readTexture("assets/tileset.png");
     sp = new ShaderProgram("src/vshad.glsl", "src/fshad.glsl");
     map::initMap();
 }
-void freeProgram(GLFWwindow* window) {
+void freeProgram() {
     // free shaders etc.
     delete sp;
 }
@@ -95,8 +119,8 @@ void drawScene(GLFWwindow* window) {
     glClear(GL_COLOR_BUFFER_BIT);
     // z buffer will be needed later on
 
-    drawGrid(window, sp, map::data, {0, 0});
-    drawGrid(window, sp, curr_piece);
+    drawGrid(sp, tex, map::data, {0, 0});
+    drawGrid(sp, tex, curr_piece);
 
     // swap buffers
     glfwSwapBuffers(window);
@@ -156,7 +180,7 @@ int main() {
 	}
 	drawScene(window);
     }
-    freeProgram(window);
+    freeProgram();
     glfwDestroyWindow(window);
     glfwTerminate();
     exit(EXIT_SUCCESS);

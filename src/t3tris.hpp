@@ -25,7 +25,7 @@ struct Position {
 
 // different shapes for tetrominos
 enum T_type {
-    O = 0,
+    O = 1,
     I,
     L,
     J,

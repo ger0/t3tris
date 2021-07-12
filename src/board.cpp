@@ -65,21 +65,33 @@ void map::pushPiece(Tetromino &tet) {
 	for (unsigned x = 0; x < BND_SIZE; x++) {
 	    if (chkBND(tet, x, y)) {
 		map::data[(y - tet.pos.y) * MAP_WIDTH + (x + tet.pos.x)] = (byte)tet.type;
-		printf("dondon: %u \n", (byte)tet.type);
 	    }
 	}
     }
     lineCheck();
 }
 
+inline float* getTexCoords(unsigned type) {
+    float *new_coords = (float*)malloc(sizeof(float) * 2 * vertCount);
+    for (int i = 0; i < vertCount; i++) {
+	new_coords[i * 2] = (texCoords[i * 2] + ((int)type - 1)) / PIECES;
+	new_coords[i * 2 + 1] = texCoords[i * 2 + 1];
+    }
+    //
+    return new_coords;
+}
+
 // todo: replace function
-void drawGrid(GLFWwindow *wnd, ShaderProgram *sp, byte grid[],
-		Position pos) {
+void drawGrid(ShaderProgram *sp, GLuint tex, 
+	    byte grid[], Position pos) {
     float x_shift = (MAP_WIDTH - 1) / 2.0f;
     float y_shift = (MAP_HEIGHT - 1) / 2.0f;
 
+    float *tileTexCoords;
+
     for (int y = 0; y < MAP_HEIGHT; y++) {
 	for (int x = 0; x < MAP_WIDTH; x++) {
+	    tileTexCoords = getTexCoords((unsigned)grid[y * MAP_WIDTH + x]);
 	    glm::vec3 color(
 		    (grid[y * MAP_WIDTH + x] % 1),
 		    (grid[y * MAP_WIDTH + x] % 2),
@@ -97,8 +109,13 @@ void drawGrid(GLFWwindow *wnd, ShaderProgram *sp, byte grid[],
 
 		glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
 
-		//glEnableVertexAttribArray(sp->a("color"));
-		//glVertexAttribPointer(sp->a("color"), 4, GL_FLOAT, false, 0, vertCol);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, tex);
+		glUniform1i(sp->u("texMap"), 0);
+		glEnableVertexAttribArray(sp->a("texCoord"));
+		glVertexAttribPointer(sp->a("texCoord"), 2, GL_FLOAT, 
+			false, 0, tileTexCoords);
+
 		glUniform3fv(sp->u("color"), 1, glm::value_ptr(color));
 
 		glEnableVertexAttribArray(sp->a("vertex"));
@@ -108,16 +125,19 @@ void drawGrid(GLFWwindow *wnd, ShaderProgram *sp, byte grid[],
 		glDrawArrays(GL_TRIANGLES, 0, vertCount);
 
 		// disable attributes
+		glDisableVertexAttribArray(sp->a("texCoord"));
 		glDisableVertexAttribArray(sp->a("color"));
 		glDisableVertexAttribArray(sp->a("vertex"));
 	    }
 	}
     }
+    free(tileTexCoords);
 }
 
-void drawGrid(GLFWwindow *wnd, ShaderProgram *sp, Tetromino &tet) {
+void drawGrid(ShaderProgram *sp, GLuint tex, Tetromino &tet) {
     float x_shift = (MAP_WIDTH - 1) / 2.0f;
     float y_shift = (MAP_HEIGHT - 1) / 2.0f;
+    float *tileTexCoords = getTexCoords((unsigned)tet.type);
 
     for (int y = 0; y < BND_SIZE; y++) {
 	for (int x = 0; x < BND_SIZE; x++) {
@@ -138,9 +158,12 @@ void drawGrid(GLFWwindow *wnd, ShaderProgram *sp, Tetromino &tet) {
 
 		glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
 
-		//glEnableVertexAttribArray(sp->a("color"));
-		//glVertexAttribPointer(sp->a("color"), 4, GL_FLOAT, false, 0, vertCol);
-		glUniform3fv(sp->u("color"), 1, glm::value_ptr(color));
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, tex);
+		glUniform1i(sp->u("texMap"), 0);
+		glEnableVertexAttribArray(sp->a("texCoord"));
+		glVertexAttribPointer(sp->a("texCoord"), 2, GL_FLOAT, 
+			false, 0, tileTexCoords);
 
 		glEnableVertexAttribArray(sp->a("vertex"));
 		glVertexAttribPointer(sp->a("vertex"), 4, GL_FLOAT, false, 0, verts);
@@ -149,9 +172,12 @@ void drawGrid(GLFWwindow *wnd, ShaderProgram *sp, Tetromino &tet) {
 		glDrawArrays(GL_TRIANGLES, 0, vertCount);
 
 		// disable attributes
+		glDisableVertexAttribArray(sp->a("texCoord"));
 		glDisableVertexAttribArray(sp->a("color"));
 		glDisableVertexAttribArray(sp->a("vertex"));
+
 	    }
 	}
     }
+    free(tileTexCoords);
 }
