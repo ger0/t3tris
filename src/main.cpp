@@ -26,10 +26,10 @@ void setPieces() {
     curr_piece = next_piece;
 
     unsigned var = rand() % PIECES;
-    next_piece.type = T_type(var);
+    next_piece.type = T_type(var + 1);
     memcpy(next_piece.data, t_types + BND_AREA * var, BND_AREA);
-    next_piece.pos = {(MAP_WIDTH - 1) / 2, 1};
-    printf("%i\n", next_piece.type);
+    next_piece.pos = {(MAP_WIDTH - 1) / 2, 0};
+    printf("NEXT PIECE: %i\n", next_piece.type);
 }
 // callbacks	-------------------------------------------------------
 void errCallback(int error, const char* description) {

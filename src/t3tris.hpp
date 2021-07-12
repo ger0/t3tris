@@ -1,12 +1,14 @@
 #pragma once
 
-// default window size
-#define WND_WIDTH	500
-#define WND_HEIGHT	1000
-
 // map definitions
-#define MAP_WIDTH	10
-#define MAP_HEIGHT	20
+#define CELL_SIZE	32
+
+#define MAP_WIDTH	12
+#define MAP_HEIGHT	21
+
+// default window size
+#define WND_WIDTH	CELL_SIZE * MAP_WIDTH
+#define WND_HEIGHT	CELL_SIZE * MAP_HEIGHT
 
 #define PI 3.141592653589793
 
@@ -26,12 +28,12 @@ struct Position {
 // different shapes for tetrominos
 enum T_type {
     O = 1,
-    I,
-    L,
-    J,
-    S,
-    Z,
-    T
+    I = 2,
+    L = 3,
+    J = 4,
+    S = 5,
+    Z = 6,
+    T = 7
 };
 // stores information about tetrominos during gameplay
 struct Tetromino {

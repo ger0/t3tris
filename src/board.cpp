@@ -5,11 +5,11 @@ byte map::data[MAP_WIDTH * MAP_HEIGHT] = {0};
 void map::initMap() {
     if (MAP_WIDTH) {
 	for (unsigned i = 0; i < MAP_HEIGHT; i++) {
-	    map::data[i * MAP_WIDTH] = 15;
-	    map::data[i * MAP_WIDTH + MAP_WIDTH - 1] = 15;
+	    map::data[i * MAP_WIDTH] = 8;
+	    map::data[i * MAP_WIDTH + MAP_WIDTH - 1] = 8;
 	}
 	for (unsigned i = 0; i < MAP_WIDTH; i++) {
-	    map::data[i + MAP_WIDTH * (MAP_HEIGHT - 1)] = 15;
+	    map::data[i + MAP_WIDTH * (MAP_HEIGHT - 1)] = 8;
 	}
     }
 }
@@ -53,9 +53,15 @@ void lineCheck() {
 	if (isFull) {
 	    printf("full line\n");
 	    byte temp[MAP_WIDTH * MAP_HEIGHT];
-	    memcpy(temp, map::data, (y - 1) * MAP_WIDTH);
+	    memcpy(temp, map::data, MAP_HEIGHT * MAP_WIDTH);
 	    // copies data from lines above the removed line
-	    memcpy(map::data + (MAP_WIDTH) * 2, temp, (y - 1) * MAP_WIDTH);
+	    memcpy(map::data + MAP_WIDTH, temp, y * MAP_WIDTH);
+	    for (unsigned i = 0; i < MAP_WIDTH; i++) {
+		if (i == 0 || i == MAP_WIDTH - 1)
+		    map::data[i] = 8;
+		else 
+		    map::data[i] = 0;
+	    }
 	}
     }
 }
@@ -71,17 +77,17 @@ void map::pushPiece(Tetromino &tet) {
     lineCheck();
 }
 
+// TODO: get rid of this 
 inline float* getTexCoords(unsigned type) {
     float *new_coords = (float*)malloc(sizeof(float) * 2 * vertCount);
     for (int i = 0; i < vertCount; i++) {
-	new_coords[i * 2] = (texCoords[i * 2] + ((int)type - 1)) / PIECES;
+	new_coords[i * 2] = (texCoords[i * 2] + (int)type - 1) / (PIECES + 1);
 	new_coords[i * 2 + 1] = texCoords[i * 2 + 1];
     }
-    //
     return new_coords;
 }
 
-// todo: replace function
+// TODO: replace both drawGrid functions
 void drawGrid(ShaderProgram *sp, GLuint tex, 
 	    byte grid[], Position pos) {
     float x_shift = (MAP_WIDTH - 1) / 2.0f;
@@ -92,10 +98,6 @@ void drawGrid(ShaderProgram *sp, GLuint tex,
     for (int y = 0; y < MAP_HEIGHT; y++) {
 	for (int x = 0; x < MAP_WIDTH; x++) {
 	    tileTexCoords = getTexCoords((unsigned)grid[y * MAP_WIDTH + x]);
-	    glm::vec3 color(
-		    (grid[y * MAP_WIDTH + x] % 1),
-		    (grid[y * MAP_WIDTH + x] % 2),
-		    (grid[y * MAP_WIDTH + x] % 3));
 	    // replace
 	    if (grid[y * MAP_WIDTH + x] != 0) {
 		sp->use();
@@ -116,8 +118,6 @@ void drawGrid(ShaderProgram *sp, GLuint tex,
 		glVertexAttribPointer(sp->a("texCoord"), 2, GL_FLOAT, 
 			false, 0, tileTexCoords);
 
-		glUniform3fv(sp->u("color"), 1, glm::value_ptr(color));
-
 		glEnableVertexAttribArray(sp->a("vertex"));
 		glVertexAttribPointer(sp->a("vertex"), 4, GL_FLOAT, false, 0, verts);
 
@@ -126,7 +126,6 @@ void drawGrid(ShaderProgram *sp, GLuint tex,
 
 		// disable attributes
 		glDisableVertexAttribArray(sp->a("texCoord"));
-		glDisableVertexAttribArray(sp->a("color"));
 		glDisableVertexAttribArray(sp->a("vertex"));
 	    }
 	}
@@ -141,10 +140,6 @@ void drawGrid(ShaderProgram *sp, GLuint tex, Tetromino &tet) {
 
     for (int y = 0; y < BND_SIZE; y++) {
 	for (int x = 0; x < BND_SIZE; x++) {
-	    glm::vec3 color(
-		    (tet.type % 1),
-		    (tet.type % 2),
-		    (tet.type % 3));
 	    // replace
 	    if (((tet.data[y * BND_SIZE + x] >> tet.rot) & 1) != 0) {
 		sp->use();
@@ -173,7 +168,6 @@ void drawGrid(ShaderProgram *sp, GLuint tex, Tetromino &tet) {
 
 		// disable attributes
 		glDisableVertexAttribArray(sp->a("texCoord"));
-		glDisableVertexAttribArray(sp->a("color"));
 		glDisableVertexAttribArray(sp->a("vertex"));
 
 	    }
