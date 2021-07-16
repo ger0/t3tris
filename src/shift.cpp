@@ -31,16 +31,18 @@ void resetShift(Shift dir) {
 }
 
 void setShift(Shift dir, Tetromino &curr) {
-    canShift = false;
     shiftDir = dir;
     shiftPiece(curr);
+    canShift = false;
+
+    arrCycles = 0;
+    dasCycles = 0;
 }
 
 void shiftUpdate(Tetromino &curr) {
     if (dasCycles > DAS) {
 	if (shiftDir != None && !canShift) {
 	    canShift = true;
-	    arrCycles = 0;
 	}
 	dasCycles = 0;
     }

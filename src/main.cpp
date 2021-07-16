@@ -8,6 +8,10 @@
 #include <vector>
 #include <algorithm>
 #include <time.h>
+
+#include <chrono>
+#include <thread>
+
 #include "lodepng/lodepng.h"
 
 #include "shaderprogram.hpp"
@@ -15,13 +19,18 @@
 #include "board.hpp"
 #include "t3tris.hpp"
 #include "srs.hpp"
+#include "shift.hpp"
 
 ShaderProgram	*sp;
 GLuint		tex;
 
+Tetromino buff_piece;
+
 Tetromino curr_piece;
 Tetromino next_piece;
 
+// temp
+bool canSwap = true;
 // td move outside main
 void setPieces() {
     curr_piece = next_piece;
@@ -31,6 +40,7 @@ void setPieces() {
     memcpy(next_piece.data, t_types + BND_AREA * var, BND_AREA);
     next_piece.pos = {(MAP_WIDTH - 1) / 2, 0};
     printf("NEXT PIECE: %i\n", next_piece.type);
+    canSwap = true;
 }
 // callbacks	-------------------------------------------------------
 void errCallback(int error, const char* description) {
@@ -52,17 +62,34 @@ void keyCallback(GLFWwindow* wnd, int key, int scancode, int act, int mod) {
 	    map::chkCollision(curr_piece, {0, 0}, 2);
 
 	// position
-	if (key == GLFW_KEY_LEFT)
-	    map::chkCollision(curr_piece, {-1, 0}, 0);
-	if (key == GLFW_KEY_RIGHT)
-	    map::chkCollision(curr_piece, {1, 0}, 0);
-	if (key == GLFW_KEY_DOWN)
-	    map::chkCollision(curr_piece, {0, -1}, 0);
+	if (key == GLFW_KEY_LEFT) {
+	    setShift(Left, curr_piece);
+	}
+	if (key == GLFW_KEY_RIGHT) {
+	    setShift(Right, curr_piece);
+	}
+	if (key == GLFW_KEY_DOWN) {
+	    setShiftDown();
+	}
 	// hard drop
 	if (key == GLFW_KEY_SPACE) {
 	    while (!map::chkCollision(curr_piece, {0, -1}, 0));
 	    map::pushPiece(curr_piece);
 	    setPieces();
+	}
+
+	if (key == GLFW_KEY_LEFT_SHIFT) {
+	    if (canSwap) {
+		if (buff_piece.type == 0) {
+		    buff_piece = curr_piece;
+		    setPieces();
+		} else {
+		    std::swap(curr_piece, buff_piece);
+		    canSwap = false;
+		}
+		buff_piece.pos = {(MAP_WIDTH - 1) / 2, 0};
+		buff_piece.rot = 0;
+	    }
 	}
 	// debug
 	/*
@@ -73,6 +100,14 @@ void keyCallback(GLFWwindow* wnd, int key, int scancode, int act, int mod) {
 	*/
     }
     if (act == GLFW_RELEASE) {
+	if (key == GLFW_KEY_LEFT) {
+	    resetShift(Left);
+	} else if (key == GLFW_KEY_RIGHT) {
+	    resetShift(Right);
+	}
+	if (key == GLFW_KEY_DOWN) {
+	    resetShift(Down);
+	}
     }
 }
 GLuint readTexture(const char* filename) {
@@ -153,33 +188,52 @@ int main() {
     }
     initProgram(window);
    
-    auto time_step = glfwGetTime();
-
     // lol
     int temp = 0;
     setPieces();
     setPieces();
 
+    double time_after  = glfwGetTime();
+    double time_before = glfwGetTime();
+    double timer       = time_after;
+    double delta = 0;
+
+    unsigned dasCycles = 0;
+    unsigned arrCycles = 0;
+    unsigned cycles    = 0;
+
+    double time_cap = 1.0 / 60.0;
+
     // main game loop
     while (!glfwWindowShouldClose(window)) {
-	glfwPollEvents();
-	if (glfwGetTime() - time_step >= 0.10) {
-	    time_step = glfwGetTime();
-	}
-	if (glfwGetTime() >= 0.75) {
-	    time_step = 0;
+	time_after = glfwGetTime();
+	delta += (time_after - time_before) / time_cap;
+	time_before = time_after;
 
-	    if (temp == 1) {
-		map::pushPiece(curr_piece);
-		setPieces();
-		temp = 0;
+	glfwPollEvents();
+	while (delta >= 1.0) { 
+	    shiftUpdate(curr_piece);
+
+	    if (cycles > gameCycles) {
+		if (map::chkCollision(curr_piece, {0, -1}, 0)) {
+		    if (temp == 1) {
+			map::pushPiece(curr_piece);
+			setPieces();
+			temp = 0;
+		    } else 
+			temp++;
+		}
+		cycles = 0;
 	    }
-	    if (map::chkCollision(curr_piece, {0, -1}, 0)) {
-		temp++;
-	    }
-	    glfwSetTime(0);
+	    dasCycles++;
+	    arrCycles++;
+	    cycles++;
+	    delta--;
 	}
 	drawScene(window);
+	if (glfwGetTime() - timer > 1.0) {
+            timer++;
+        }
     }
     freeProgram();
     glfwDestroyWindow(window);
