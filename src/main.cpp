@@ -9,9 +9,6 @@
 #include <algorithm>
 #include <time.h>
 
-#include <chrono>
-#include <thread>
-
 #include "lodepng/lodepng.h"
 
 #include "shaderprogram.hpp"
@@ -125,10 +122,9 @@ GLuint readTexture(const char* filename) {
     glBindTexture(GL_TEXTURE_2D, tex0);
     glTexImage2D(GL_TEXTURE_2D, 0, 4, width, height, 0, 
 	    GL_RGBA, GL_UNSIGNED_BYTE, (byte*)image.data());
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     return tex0;
 }
@@ -189,7 +185,6 @@ int main() {
     initProgram(window);
    
     // lol
-    int temp = 0;
     setPieces();
     setPieces();
 
@@ -197,10 +192,6 @@ int main() {
     double time_before = glfwGetTime();
     double timer       = time_after;
     double delta = 0;
-
-    unsigned dasCycles = 0;
-    unsigned arrCycles = 0;
-    unsigned cycles    = 0;
 
     double time_cap = 1.0 / 60.0;
 
@@ -212,22 +203,8 @@ int main() {
 
 	glfwPollEvents();
 	while (delta >= 1.0) { 
-	    shiftUpdate(curr_piece);
-
-	    if (cycles > gameCycles) {
-		if (map::chkCollision(curr_piece, {0, -1}, 0)) {
-		    if (temp == 1) {
-			map::pushPiece(curr_piece);
-			setPieces();
-			temp = 0;
-		    } else 
-			temp++;
-		}
-		cycles = 0;
-	    }
-	    dasCycles++;
-	    arrCycles++;
-	    cycles++;
+	    if (shiftUpdate(curr_piece))
+		setPieces();
 	    delta--;
 	}
 	drawScene(window);

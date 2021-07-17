@@ -5,11 +5,16 @@ Shift shiftDir = None;
 bool canShiftDown = false; 
 bool canShift 	  = false;
 
-unsigned gameCycles = 20;
+int gameCycles = 50;
 
-unsigned dasCycles = 0;
-unsigned arrCycles = 0;
-unsigned cycles	   = 0;
+// TODO maybe change this?
+unsigned cycles		= 0;
+unsigned dasCycles	= 0;
+unsigned arrCycles	= 0;
+unsigned downCycles	= 0;
+unsigned stuckCycles	= 0;
+
+unsigned clearedLines 	= 0;
 
 void shiftDown(Tetromino &curr) {
     map::chkCollision(curr, {0, -1}, 0);
@@ -39,27 +44,46 @@ void setShift(Shift dir, Tetromino &curr) {
     dasCycles = 0;
 }
 
-void shiftUpdate(Tetromino &curr) {
-    if (dasCycles > DAS) {
+bool shiftUpdate(Tetromino &curr) {
+    if (dasCycles >= DAS) {
 	if (shiftDir != None && !canShift) {
 	    canShift = true;
 	}
 	dasCycles = 0;
     }
-    if (arrCycles > ARR) {
+    if (arrCycles >= ARR) {
 	if (canShift != None) {
 	    shiftPiece(curr);
 	}
 	arrCycles = 0;
     }
-    if (cycles >= gameCycles / SDF && canShiftDown) {
+    if (downCycles >= gameCycles / SDF && canShiftDown) {
 	shiftDown(curr);
-	cycles = 0;
+	downCycles = 0;
     }
-
     dasCycles++;
     arrCycles++;
+    downCycles++;
     cycles++;
+
+    if (clearedLines == 10) {
+	gameCycles -= 5;
+	clearedLines = 0;
+    }
+    if (cycles > gameCycles) {
+	if (map::chkCollision(curr, {0, -1}, 0)) {
+	    if (stuckCycles >= 2) {
+		map::pushPiece(curr);
+		stuckCycles = 0;
+		clearedLines++;
+		return true;
+	    } else 
+		stuckCycles++;
+	} else
+	    stuckCycles = 0;
+	cycles = 0;
+    }
+    return false;
 }
 
 void setShiftDown() {
