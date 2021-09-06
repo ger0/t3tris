@@ -104,12 +104,15 @@ void drawGrid(ShaderProgram *sp, GLuint tex,
 
 		glm::mat4 M = glm::mat4(1.f);
 		
-		M = glm::scale(M, glm::vec3(1.0f / MAP_WIDTH, 1.0f / MAP_HEIGHT, 1.f));
+		M = glm::scale(M, glm::vec3(1.0f / MAP_WIDTH, 1.0f / MAP_HEIGHT, 1.f / MAP_WIDTH));
 		M = glm::translate(M, glm::vec3(
 		    2 * (float)(pos.x + x - x_shift),
 		    2 * (float)(pos.y - y + y_shift), 0.f));
 
 		glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
+
+		glEnableVertexAttribArray(sp->a("normal"));
+		glVertexAttribPointer(sp->a("normal"), 4, GL_FLOAT, false, 0, vertNormal);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, tex);
@@ -125,6 +128,7 @@ void drawGrid(ShaderProgram *sp, GLuint tex,
 		glDrawArrays(GL_TRIANGLES, 0, vertCount);
 
 		// disable attributes
+		glDisableVertexAttribArray(sp->a("normal"));
 		glDisableVertexAttribArray(sp->a("texCoord"));
 		glDisableVertexAttribArray(sp->a("vertex"));
 	    }
@@ -133,6 +137,7 @@ void drawGrid(ShaderProgram *sp, GLuint tex,
     free(tileTexCoords);
 }
 
+// draws tetromino
 void drawGrid(ShaderProgram *sp, GLuint tex, Tetromino &tet) {
     float x_shift = (MAP_WIDTH - 1) / 2.0f;
     float y_shift = (MAP_HEIGHT - 1) / 2.0f;
@@ -146,12 +151,15 @@ void drawGrid(ShaderProgram *sp, GLuint tex, Tetromino &tet) {
 
 		glm::mat4 M = glm::mat4(1.f);
 		
-		M = glm::scale(M, glm::vec3(1.0f / MAP_WIDTH, 1.0f / MAP_HEIGHT, 1.f));
+		M = glm::scale(M, glm::vec3(1.0f / MAP_WIDTH, 1.0f / MAP_HEIGHT, 1.f / MAP_WIDTH));
 		M = glm::translate(M, glm::vec3(
 		    2 * (float)(tet.pos.x + x - x_shift),
 		    2 * (float)(tet.pos.y - y + y_shift), 0.f));
 
 		glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
+
+		glEnableVertexAttribArray(sp->a("normal"));
+		glVertexAttribPointer(sp->a("normal"), 4, GL_FLOAT, false, 0, vertNormal);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, tex);
@@ -167,6 +175,7 @@ void drawGrid(ShaderProgram *sp, GLuint tex, Tetromino &tet) {
 		glDrawArrays(GL_TRIANGLES, 0, vertCount);
 
 		// disable attributes
+		glDisableVertexAttribArray(sp->a("normal"));
 		glDisableVertexAttribArray(sp->a("texCoord"));
 		glDisableVertexAttribArray(sp->a("vertex"));
 

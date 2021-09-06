@@ -26,6 +26,10 @@ Tetromino buff_piece;
 Tetromino curr_piece;
 Tetromino next_piece;
 
+// mouse 
+float pitch = 0.0f, yaw = 0.0f;
+float lastX = 400, lastY = 350;
+
 // temp
 bool canSwap = true;
 // td move outside main
@@ -40,6 +44,18 @@ void setPieces() {
     canSwap = true;
 }
 // callbacks	-------------------------------------------------------
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;
+    lastX = xpos;
+    lastY = ypos;
+
+    const float sensitivity = 0.005f;
+    xoffset *= sensitivity;
+    yoffset *= sensitivity; 
+    yaw -= xoffset;
+    pitch += yoffset;
+}
 void errCallback(int error, const char* description) {
 	fputs(description, stderr);
 }
@@ -134,7 +150,10 @@ void initProgram(GLFWwindow* window) {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glClearColor(0, 0, 0, 1);
-    //glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
+
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPosCallback(window, mouse_callback);
 
     glfwSetWindowSizeCallback(window, windowResizeCallback);
     glfwSetKeyCallback(window, keyCallback);
@@ -148,12 +167,29 @@ void freeProgram() {
 }
 // --------------------------------------------------------------------
 void drawScene(GLFWwindow* window) {
-    glClear(GL_COLOR_BUFFER_BIT);
-    // z buffer will be needed later on
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+    glm::mat4 V = 
+	    glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f),
+	    glm::vec3(0.0f, 0.0f, 0.0f),
+	    glm::vec3(0.0f, 1.0f, 0.0f));
+    V = glm::rotate(V, yaw, glm::vec3(0.0f, 1.0f, 0.0f));
+    V = glm::rotate(V, pitch, glm::vec3(1.0f, 0.0f, 0.0f));
+
+    /*
+    glm::mat4 P = 
+	glm::perspective(glm::radians(50.0f), 1.0f, 1.0f, 50.0f);
+	*/
+    glm::mat4 P = 
+	glm::perspective(50.0f * (float)PI / 180.0f,
+		1.0f, 1.00f, 50.0f);
+    
+    glUniformMatrix4fv(sp->u("V"), 1, false, glm::value_ptr(V));
+    glUniformMatrix4fv(sp->u("P"), 1, false, glm::value_ptr(P));
 
     drawGrid(sp, tex, map::data, {0, 0});
     drawGrid(sp, tex, curr_piece);
-
+    //
     // swap buffers
     glfwSwapBuffers(window);
 }
@@ -188,10 +224,10 @@ int main() {
     setPieces();
     setPieces();
 
-    double time_after  = glfwGetTime();
-    double time_before = glfwGetTime();
-    double timer       = time_after;
-    double delta = 0;
+    double time_after	= glfwGetTime();
+    double time_before	= glfwGetTime();
+    double timer	= time_after;
+    double delta	= 0;
 
     double time_cap = 1.0 / 60.0;
 
@@ -203,6 +239,7 @@ int main() {
 
 	glfwPollEvents();
 	while (delta >= 1.0) { 
+	    // update board
 	    if (shiftUpdate(curr_piece))
 		setPieces();
 	    delta--;
