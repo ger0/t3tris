@@ -5,6 +5,7 @@
 
 #define MAP_WIDTH	12
 #define MAP_HEIGHT	21
+#define SCALE		10
 
 // default window size
 #define WND_WIDTH	CELL_SIZE * MAP_WIDTH

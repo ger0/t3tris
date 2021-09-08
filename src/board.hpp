@@ -17,9 +17,6 @@ namespace map {
     void	pushPiece(Tetromino &tet);
 }
 
-// draws a grid of dim dimensions
-void drawGrid(ShaderProgram *sp, 
-	    GLuint tex, byte grid[], Position pos);
-
-void drawGrid(ShaderProgram *sp, 
-	    GLuint tex, Tetromino &tet);
+// draws a grid 
+void drawGrid(ShaderProgram *sp, GLuint tex, 
+	byte grid[], Tetromino *tet = NULL);

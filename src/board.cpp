@@ -77,7 +77,6 @@ void map::pushPiece(Tetromino &tet) {
     lineCheck();
 }
 
-// TODO: get rid of this 
 inline float* getTexCoords(unsigned type) {
     float *new_coords = (float*)malloc(sizeof(float) * 2 * vertCount);
     for (int i = 0; i < vertCount; i++) {
@@ -87,24 +86,39 @@ inline float* getTexCoords(unsigned type) {
     return new_coords;
 }
 
-// TODO: replace both drawGrid functions
-void drawGrid(ShaderProgram *sp, GLuint tex, 
-	    byte grid[], Position pos) {
+void drawGrid(ShaderProgram *sp, GLuint tex,
+	    byte grid[], Tetromino *tet) {
+
     float x_shift = (MAP_WIDTH - 1) / 2.0f;
     float y_shift = (MAP_HEIGHT - 1) / 2.0f;
 
     float *tileTexCoords;
 
-    for (int y = 0; y < MAP_HEIGHT; y++) {
-	for (int x = 0; x < MAP_WIDTH; x++) {
-	    tileTexCoords = getTexCoords((unsigned)grid[y * MAP_WIDTH + x]);
-	    // replace
-	    if (grid[y * MAP_WIDTH + x] != 0) {
+    Position pos = {0, 0};
+    int	rot = 0;
+    Position size;
+    if (tet != NULL) {
+	pos = tet->pos;
+	rot = tet->rot;
+	size = {BND_SIZE, BND_SIZE};
+	tileTexCoords = getTexCoords((unsigned)tet->type);
+    } else {
+	size = {MAP_WIDTH, MAP_HEIGHT};
+    }
+    unsigned block;
+
+    for (int y = 0; y < size.y; y++) {
+	for (int x = 0; x < size.x; x++) {
+	    block = grid[y * size.x + x];
+	    if (tet == NULL)
+		tileTexCoords = getTexCoords(block);
+	    if (((block >> rot) & 1) != 0 ||
+		(tet == NULL && block != 0)) {
 		sp->use();
 
 		glm::mat4 M = glm::mat4(1.f);
 		
-		M = glm::scale(M, glm::vec3(1.0f / MAP_WIDTH, 1.0f / MAP_WIDTH, 1.f / MAP_WIDTH));
+		M = glm::scale(M, glm::vec3(1.0f / SCALE, 1.0f / SCALE, 1.f / SCALE));
 		M = glm::translate(M, glm::vec3(
 		    2 * (float)(pos.x + x - x_shift),
 		    2 * (float)(pos.y - y + y_shift), 0.f));
@@ -131,54 +145,6 @@ void drawGrid(ShaderProgram *sp, GLuint tex,
 		glDisableVertexAttribArray(sp->a("normal"));
 		glDisableVertexAttribArray(sp->a("texCoord"));
 		glDisableVertexAttribArray(sp->a("vertex"));
-	    }
-	}
-    }
-    free(tileTexCoords);
-}
-
-// draws tetromino
-void drawGrid(ShaderProgram *sp, GLuint tex, Tetromino &tet) {
-    float x_shift = (MAP_WIDTH - 1) / 2.0f;
-    float y_shift = (MAP_HEIGHT - 1) / 2.0f;
-    float *tileTexCoords = getTexCoords((unsigned)tet.type);
-
-    for (int y = 0; y < BND_SIZE; y++) {
-	for (int x = 0; x < BND_SIZE; x++) {
-	    // replace
-	    if (((tet.data[y * BND_SIZE + x] >> tet.rot) & 1) != 0) {
-		sp->use();
-
-		glm::mat4 M = glm::mat4(1.f);
-		
-		M = glm::scale(M, glm::vec3(1.0f / MAP_WIDTH, 1.0f / MAP_WIDTH, 1.f / MAP_WIDTH));
-		M = glm::translate(M, glm::vec3(
-		    2 * (float)(tet.pos.x + x - x_shift),
-		    2 * (float)(tet.pos.y - y + y_shift), 0.f));
-
-		glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
-
-		glEnableVertexAttribArray(sp->a("normal"));
-		glVertexAttribPointer(sp->a("normal"), 4, GL_FLOAT, false, 0, vertNormal);
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, tex);
-		glUniform1i(sp->u("texMap"), 0);
-		glEnableVertexAttribArray(sp->a("texCoord"));
-		glVertexAttribPointer(sp->a("texCoord"), 2, GL_FLOAT, 
-			false, 0, tileTexCoords);
-
-		glEnableVertexAttribArray(sp->a("vertex"));
-		glVertexAttribPointer(sp->a("vertex"), 4, GL_FLOAT, false, 0, verts);
-
-		// draw
-		glDrawArrays(GL_TRIANGLES, 0, vertCount);
-
-		// disable attributes
-		glDisableVertexAttribArray(sp->a("normal"));
-		glDisableVertexAttribArray(sp->a("texCoord"));
-		glDisableVertexAttribArray(sp->a("vertex"));
-
 	    }
 	}
     }

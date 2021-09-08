@@ -104,8 +104,7 @@ void keyCallback(GLFWwindow* wnd, int key, int scancode, int act, int mod) {
 		buff_piece.rot = 0;
 	    }
 	}
-	// debug
-	/*
+	/* debug
 	if (key == GLFW_KEY_ENTER) {
 	    map::pushPiece(curr_piece);
 	    setPieces();
@@ -184,9 +183,9 @@ void drawScene(GLFWwindow* window) {
     glUniformMatrix4fv(sp->u("V"), 1, false, glm::value_ptr(V));
     glUniformMatrix4fv(sp->u("P"), 1, false, glm::value_ptr(P));
 
-    drawGrid(sp, tex, map::data, {0, 0});
-    drawGrid(sp, tex, curr_piece);
-    //
+    drawGrid(sp, tex, map::data);
+    drawGrid(sp, tex, curr_piece.data, &curr_piece);
+    
     // swap buffers
     glfwSwapBuffers(window);
 }

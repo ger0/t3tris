@@ -70,7 +70,7 @@ bool shiftUpdate(Tetromino &curr) {
 	gameCycles -= 5;
 	clearedLines = 0;
     }
-    if (cycles > gameCycles) {
+    if (cycles > (unsigned)gameCycles) {
 	if (map::chkCollision(curr, {0, -1}, 0)) {
 	    if (stuckCycles >= 2) {
 		map::pushPiece(curr);
