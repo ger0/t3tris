@@ -170,19 +170,16 @@ void drawScene(GLFWwindow* window) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     glm::mat4 V = 
-	    glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f),
-	    glm::vec3(0.0f, 0.0f, 0.0f),
-	    glm::vec3(0.0f, 1.0f, 0.0f));
+	    glm::lookAt(
+		glm::vec3(0.0f, 0.0f, 5.0f),
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(0.0f, 1.0f, 0.0f));
     V = glm::rotate(V, yaw, glm::vec3(0.0f, 1.0f, 0.0f));
     V = glm::rotate(V, pitch, glm::vec3(1.0f, 0.0f, 0.0f));
 
-    /*
-    glm::mat4 P = 
-	glm::perspective(glm::radians(50.0f), 1.0f, 1.0f, 50.0f);
-	*/
     glm::mat4 P = 
 	glm::perspective(50.0f * (float)PI / 180.0f,
-		1.0f, 1.00f, 50.0f);
+		(float)MAP_WIDTH / (float)MAP_HEIGHT, 0.01f, 50.0f);
     
     glUniformMatrix4fv(sp->u("V"), 1, false, glm::value_ptr(V));
     glUniformMatrix4fv(sp->u("P"), 1, false, glm::value_ptr(P));

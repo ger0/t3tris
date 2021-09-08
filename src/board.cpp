@@ -104,7 +104,7 @@ void drawGrid(ShaderProgram *sp, GLuint tex,
 
 		glm::mat4 M = glm::mat4(1.f);
 		
-		M = glm::scale(M, glm::vec3(1.0f / MAP_WIDTH, 1.0f / MAP_HEIGHT, 1.f / MAP_WIDTH));
+		M = glm::scale(M, glm::vec3(1.0f / MAP_WIDTH, 1.0f / MAP_WIDTH, 1.f / MAP_WIDTH));
 		M = glm::translate(M, glm::vec3(
 		    2 * (float)(pos.x + x - x_shift),
 		    2 * (float)(pos.y - y + y_shift), 0.f));
@@ -151,7 +151,7 @@ void drawGrid(ShaderProgram *sp, GLuint tex, Tetromino &tet) {
 
 		glm::mat4 M = glm::mat4(1.f);
 		
-		M = glm::scale(M, glm::vec3(1.0f / MAP_WIDTH, 1.0f / MAP_HEIGHT, 1.f / MAP_WIDTH));
+		M = glm::scale(M, glm::vec3(1.0f / MAP_WIDTH, 1.0f / MAP_WIDTH, 1.f / MAP_WIDTH));
 		M = glm::translate(M, glm::vec3(
 		    2 * (float)(tet.pos.x + x - x_shift),
 		    2 * (float)(tet.pos.y - y + y_shift), 0.f));
