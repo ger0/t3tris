@@ -20,6 +20,7 @@
 
 ShaderProgram	*sp;
 GLuint		tex;
+glm::vec3 cameraPos = glm::vec3(0.f, 0.f, 5.f);
 
 Tetromino buff_piece;
 
@@ -170,7 +171,7 @@ void drawScene(GLFWwindow* window) {
     
     glm::mat4 V = 
 	    glm::lookAt(
-		glm::vec3(0.0f, 0.0f, 5.0f),
+		cameraPos,
 		glm::vec3(0.0f, 0.0f, 0.0f),
 		glm::vec3(0.0f, 1.0f, 0.0f));
     V = glm::rotate(V, yaw, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -182,6 +183,7 @@ void drawScene(GLFWwindow* window) {
     
     glUniformMatrix4fv(sp->u("V"), 1, false, glm::value_ptr(V));
     glUniformMatrix4fv(sp->u("P"), 1, false, glm::value_ptr(P));
+    glUniformMatrix3fv(sp->u("cameraPos"), 1, false, glm::value_ptr(cameraPos));
 
     drawGrid(sp, tex, map::data);
     drawGrid(sp, tex, curr_piece.data, &curr_piece);
