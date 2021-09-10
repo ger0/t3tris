@@ -5,6 +5,8 @@
 
 #define MAP_WIDTH	12
 #define MAP_HEIGHT	21
+#define MAP_DEPTH	5
+
 #define SCALE		10
 
 // default window size
@@ -24,21 +26,24 @@ typedef unsigned char byte;
 struct Position {
     int x;
     int y;
+    int z = 0;
 };
 
 // different shapes for tetrominos
-enum T_type {
+enum Block {
+    EMPTY = 0,
     O = 1,
     I = 2,
     L = 3,
     J = 4,
     S = 5,
     Z = 6,
-    T = 7
+    T = 7,
+    WALL = 8 
 };
 // stores information about tetrominos during gameplay
 struct Tetromino {
-    T_type	type;
+    Block	type;
     Position	pos;
     int		rot;
     byte	data[BND_AREA];	

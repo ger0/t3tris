@@ -21,17 +21,24 @@ void shiftDown(Tetromino &curr) {
 }
 
 void shiftPiece(Tetromino &curr) {
-    map::chkCollision(curr, {shiftDir, 0}, 0);
+    if (shiftDir == Left)
+	map::chkCollision(curr, {-1, 0, 0}, 0);
+    else if (shiftDir == Right)
+	map::chkCollision(curr, {1, 0, 0}, 0);
+    else if (shiftDir == Far)
+	map::chkCollision(curr, {0, 0, 1}, 0);
+    else if (shiftDir == Close)
+	map::chkCollision(curr, {0, 0, -1}, 0);
 }
 //
 // ------------------------------------------------
 
 void resetShift(Shift dir) {
-    if (dir == shiftDir) {
+    if (dir == Down) {
+	canShiftDown = false;
+    } else if (dir == shiftDir) {
 	shiftDir = None;
 	canShift = false;
-    } if (dir == Down) {
-	canShiftDown = false;
     }
 }
 
@@ -52,7 +59,7 @@ bool shiftUpdate(Tetromino &curr) {
 	dasCycles = 0;
     }
     if (arrCycles >= ARR) {
-	if (canShift != None) {
+	if (canShift) {
 	    shiftPiece(curr);
 	}
 	arrCycles = 0;

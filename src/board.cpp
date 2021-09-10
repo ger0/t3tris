@@ -1,15 +1,15 @@
 #include "board.hpp"
 
-byte map::data[MAP_WIDTH * MAP_HEIGHT] = {0};
+byte map::data[MAP_WIDTH * MAP_HEIGHT] = {Block::EMPTY};
 
 void map::initMap() {
-    if (MAP_WIDTH) {
+    if (MAP_WIDTH && MAP_HEIGHT && MAP_DEPTH) {
 	for (unsigned i = 0; i < MAP_HEIGHT; i++) {
-	    map::data[i * MAP_WIDTH] = 8;
-	    map::data[i * MAP_WIDTH + MAP_WIDTH - 1] = 8;
+	    map::data[i * MAP_WIDTH] = Block::WALL;
+	    map::data[i * MAP_WIDTH + MAP_WIDTH - 1] = Block::WALL;
 	}
 	for (unsigned i = 0; i < MAP_WIDTH; i++) {
-	    map::data[i + MAP_WIDTH * (MAP_HEIGHT - 1)] = 8;
+	    map::data[i + MAP_WIDTH * (MAP_HEIGHT - 1)] = Block::WALL;
 	}
     }
 }
@@ -28,7 +28,7 @@ bool map::chkCollision(Tetromino &tet, Position mov, int rot) {
 	    if (chkBND(tet, x, y, rot)) {
 		int coord = (y - (tet.pos.y + mov.y)) * MAP_WIDTH 
 				+ x + tet.pos.x + mov.x;
-		if (map::data[coord] != 0) {
+		if (map::data[coord] != Block::EMPTY) {
 		    return true;
 		}
 	    }
@@ -36,6 +36,7 @@ bool map::chkCollision(Tetromino &tet, Position mov, int rot) {
     }
     tet.pos.x += mov.x;
     tet.pos.y += mov.y;
+    tet.pos.z += mov.z;
     if (rot)
 	tet.rot = unsigned(tet.rot + rot) % 4;
     return false;
@@ -46,7 +47,7 @@ void lineCheck() {
     for (unsigned y = 0; y < (MAP_HEIGHT - 1); y++) {
 	isFull = true;
 	for (unsigned x = 0; x < MAP_WIDTH; x++) {
-	    if (!map::data[y * MAP_WIDTH + x]) {
+	    if (map::data[y * MAP_WIDTH + x] == Block::EMPTY) {
 		isFull = false;
 	    }
 	}
@@ -58,9 +59,9 @@ void lineCheck() {
 	    memcpy(map::data + MAP_WIDTH, temp, y * MAP_WIDTH);
 	    for (unsigned i = 0; i < MAP_WIDTH; i++) {
 		if (i == 0 || i == MAP_WIDTH - 1)
-		    map::data[i] = 8;
+		    map::data[i] = Block::WALL;
 		else 
-		    map::data[i] = 0;
+		    map::data[i] = Block::EMPTY;
 	    }
 	}
     }
@@ -80,7 +81,7 @@ void map::pushPiece(Tetromino &tet) {
 inline float* getTexCoords(unsigned type) {
     float *new_coords = (float*)malloc(sizeof(float) * 2 * vertCount);
     for (int i = 0; i < vertCount; i++) {
-	new_coords[i * 2] = (texCoords[i * 2] + (int)type - 1) / (PIECES + 1);
+	new_coords[i * 2] = (texCoords[i * 2] + (int)type - 1) / (PIECES + 1); // + wall type
 	new_coords[i * 2 + 1] = texCoords[i * 2 + 1];
     }
     return new_coords;
@@ -94,8 +95,9 @@ void drawGrid(ShaderProgram *sp, GLuint tex,
 
     float *tileTexCoords;
 
-    Position pos = {0, 0};
+    Position pos = {0, 0, 0};
     int	rot = 0;
+    // size of bounding box
     Position size;
     if (tet != NULL) {
 	pos = tet->pos;
@@ -110,41 +112,48 @@ void drawGrid(ShaderProgram *sp, GLuint tex,
     for (int y = 0; y < size.y; y++) {
 	for (int x = 0; x < size.x; x++) {
 	    block = grid[y * size.x + x];
-	    if (tet == NULL)
-		tileTexCoords = getTexCoords(block);
+	    if (tet == NULL) {
+		if (x != 0 && x != size.x - 1)
+		    tileTexCoords = getTexCoords(block);
+		else
+		    continue;
+	    }
 	    if (((block >> rot) & 1) != 0 ||
-		(tet == NULL && block != 0)) {
-		sp->use();
+		(tet == NULL && block)) {
+		{
+		    sp->use();
 
-		glm::mat4 M = glm::mat4(1.f);
-		
-		M = glm::scale(M, glm::vec3(1.0f / SCALE, 1.0f / SCALE, 1.f / SCALE));
-		M = glm::translate(M, glm::vec3(
-		    2 * (float)(pos.x + x - x_shift),
-		    2 * (float)(pos.y - y + y_shift), 0.f));
+		    glm::mat4 M = glm::mat4(1.f);
+		    
+		    M = glm::scale(M, glm::vec3(1.f / SCALE, 1.f / SCALE, 1.f / SCALE));
+		    M = glm::translate(M, glm::vec3(
+			2 * (float)(pos.x + x - x_shift),
+			2 * (float)(pos.y - y + y_shift), 
+			(float)pos.z));
 
-		glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
+		    glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
 
-		glEnableVertexAttribArray(sp->a("normal"));
-		glVertexAttribPointer(sp->a("normal"), 4, GL_FLOAT, false, 0, vertNormal);
+		    glEnableVertexAttribArray(sp->a("normal"));
+		    glVertexAttribPointer(sp->a("normal"), 4, GL_FLOAT, false, 0, vertNormal);
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, tex);
-		glUniform1i(sp->u("texMap"), 0);
-		glEnableVertexAttribArray(sp->a("texCoord"));
-		glVertexAttribPointer(sp->a("texCoord"), 2, GL_FLOAT, 
-			false, 0, tileTexCoords);
+		    glActiveTexture(GL_TEXTURE0);
+		    glBindTexture(GL_TEXTURE_2D, tex);
+		    glUniform1i(sp->u("texMap"), 0);
+		    glEnableVertexAttribArray(sp->a("texCoord"));
+		    glVertexAttribPointer(sp->a("texCoord"), 2, GL_FLOAT, 
+			    false, 0, tileTexCoords);
 
-		glEnableVertexAttribArray(sp->a("vertex"));
-		glVertexAttribPointer(sp->a("vertex"), 4, GL_FLOAT, false, 0, verts);
+		    glEnableVertexAttribArray(sp->a("vertex"));
+		    glVertexAttribPointer(sp->a("vertex"), 4, GL_FLOAT, false, 0, verts);
 
-		// draw
-		glDrawArrays(GL_TRIANGLES, 0, vertCount);
+		    // draw
+		    glDrawArrays(GL_TRIANGLES, 0, vertCount);
 
-		// disable attributes
-		glDisableVertexAttribArray(sp->a("normal"));
-		glDisableVertexAttribArray(sp->a("texCoord"));
-		glDisableVertexAttribArray(sp->a("vertex"));
+		    // disable attributes
+		    glDisableVertexAttribArray(sp->a("normal"));
+		    glDisableVertexAttribArray(sp->a("texCoord"));
+		    glDisableVertexAttribArray(sp->a("vertex"));
+		}
 	    }
 	}
     }
