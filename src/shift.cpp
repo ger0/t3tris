@@ -5,7 +5,7 @@ Shift shiftDir = None;
 bool canShiftDown = false; 
 bool canShift 	  = false;
 
-int gameCycles = 50;
+int gameCycles = 100;
 
 // TODO maybe change this?
 unsigned cycles		= 0;

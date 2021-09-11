@@ -1,15 +1,32 @@
 #include "board.hpp"
 
-byte map::data[MAP_WIDTH * MAP_HEIGHT] = {Block::EMPTY};
+byte map::data[MAP_WIDTH * MAP_HEIGHT * MAP_DEPTH] = {Block::EMPTY};
+
+// todo remov
+inline unsigned getMapIndex(unsigned x, unsigned y, unsigned z) {
+    return y * MAP_WIDTH + x + MAP_WIDTH * MAP_HEIGHT * z;
+}
 
 void map::initMap() {
-    if (MAP_WIDTH && MAP_HEIGHT && MAP_DEPTH) {
+    unsigned map_plane = MAP_WIDTH * MAP_HEIGHT;
+    if (MAP_WIDTH * MAP_HEIGHT * MAP_DEPTH != 0) {
 	for (unsigned i = 0; i < MAP_HEIGHT; i++) {
-	    map::data[i * MAP_WIDTH] = Block::WALL;
-	    map::data[i * MAP_WIDTH + MAP_WIDTH - 1] = Block::WALL;
+	    for (unsigned j = 0; j < MAP_DEPTH; j++) {
+		map::data[i * MAP_WIDTH +
+			    map_plane * j] = Block::WALL;
+		map::data[(i * MAP_WIDTH + MAP_WIDTH - 1) + 
+			    map_plane * j] = Block::WALL;
+	    }
 	}
 	for (unsigned i = 0; i < MAP_WIDTH; i++) {
-	    map::data[i + MAP_WIDTH * (MAP_HEIGHT - 1)] = Block::WALL;
+	    for (unsigned j = 0; j < MAP_DEPTH; j++){
+		map::data[(i + MAP_WIDTH * (MAP_HEIGHT - 1)) +
+			    map_plane * j] = Block::WALL;
+	    }
+	}
+	for (unsigned i = 0; i < MAP_WIDTH * MAP_HEIGHT; i++) {
+	    map::data[i] = Block::WALL;
+	    map::data[i + MAP_WIDTH * MAP_HEIGHT * (MAP_DEPTH - 1)] = Block::WALL;
 	}
     }
 }
@@ -22,56 +39,59 @@ inline bool chkBND(Tetromino &tet, unsigned &x, unsigned &y, int rot = 0) {
 	return false;
 }
 
-bool map::chkCollision(Tetromino &tet, Position mov, int rot) { 
+bool map::chkCollision(Tetromino &t, Position mov, int rot) { 
     for (unsigned y = 0; y < BND_SIZE; y++) {
 	for (unsigned x = 0; x < BND_SIZE; x++) {
-	    if (chkBND(tet, x, y, rot)) {
-		int coord = (y - (tet.pos.y + mov.y)) * MAP_WIDTH 
-				+ x + tet.pos.x + mov.x;
+	    if (chkBND(t, x, y, rot)) {
+		int coord = getMapIndex(x + t.pos.x + mov.x, y - (t.pos.y + mov.y), t.pos.z + mov.z);
 		if (map::data[coord] != Block::EMPTY) {
 		    return true;
 		}
 	    }
 	}
     }
-    tet.pos.x += mov.x;
-    tet.pos.y += mov.y;
-    tet.pos.z += mov.z;
+    t.pos.x += mov.x;
+    t.pos.y += mov.y;
+    t.pos.z += mov.z;
     if (rot)
-	tet.rot = unsigned(tet.rot + rot) % 4;
+	t.rot = unsigned(t.rot + rot) % 4;
     return false;
 }
-
+// tutaj
 void lineCheck() {
     bool isFull;
+    byte temp[MAP_WIDTH * MAP_HEIGHT];
     for (unsigned y = 0; y < (MAP_HEIGHT - 1); y++) {
 	isFull = true;
-	for (unsigned x = 0; x < MAP_WIDTH; x++) {
-	    if (map::data[y * MAP_WIDTH + x] == Block::EMPTY) {
-		isFull = false;
+	for (unsigned z = 1; z < (MAP_DEPTH - 1); z++) {
+	    for (unsigned x = 0; x < MAP_WIDTH; x++) {
+		if (map::data[getMapIndex(x, y, z)] == Block::EMPTY) {
+		    isFull = false;
+		}
 	    }
 	}
 	if (isFull) {
 	    printf("full line\n");
-	    byte temp[MAP_WIDTH * MAP_HEIGHT];
-	    memcpy(temp, map::data, MAP_HEIGHT * MAP_WIDTH);
-	    // copies data from lines above the removed line
-	    memcpy(map::data + MAP_WIDTH, temp, y * MAP_WIDTH);
-	    for (unsigned i = 0; i < MAP_WIDTH; i++) {
-		if (i == 0 || i == MAP_WIDTH - 1)
-		    map::data[i] = Block::WALL;
-		else 
-		    map::data[i] = Block::EMPTY;
+	    for (unsigned i = 1; i < MAP_DEPTH - 1; i++) {
+		memcpy(temp, map::data + i * MAP_HEIGHT * MAP_WIDTH, MAP_HEIGHT * MAP_WIDTH);
+		// copies data from lines above the removed line
+		memcpy(map::data + MAP_WIDTH + i * MAP_HEIGHT * MAP_WIDTH, temp, y * MAP_WIDTH);
+		for (unsigned j = 0; j < MAP_DEPTH; j++) {
+		    if (j == 0 || j == MAP_WIDTH - 1)
+			map::data[j + MAP_WIDTH * MAP_HEIGHT * i] = Block::WALL;
+		    else 
+			map::data[j + MAP_WIDTH * MAP_HEIGHT * i] = Block::EMPTY;
+		    }
 	    }
 	}
     }
 }
 
-void map::pushPiece(Tetromino &tet) {
+void map::pushPiece(Tetromino &t) {
     for (unsigned y = 0; y < BND_SIZE; y++) {
 	for (unsigned x = 0; x < BND_SIZE; x++) {
-	    if (chkBND(tet, x, y)) {
-		map::data[(y - tet.pos.y) * MAP_WIDTH + (x + tet.pos.x)] = (byte)tet.type;
+	    if (chkBND(t, x, y)) {
+		map::data[getMapIndex(x + t.pos.x, y - t.pos.y, t.pos.z)] = (byte)t.type;
 	    }
 	}
     }
@@ -90,7 +110,7 @@ inline float* getTexCoords(unsigned type) {
 void drawGrid(ShaderProgram *sp, GLuint tex,
 	    byte grid[], Tetromino *tet) {
 
-    float x_shift = (MAP_WIDTH - 1) / 2.0f;
+    float x_shift = (MAP_WIDTH 	- 1) / 2.0f;
     float y_shift = (MAP_HEIGHT - 1) / 2.0f;
 
     float *tileTexCoords;
@@ -102,25 +122,26 @@ void drawGrid(ShaderProgram *sp, GLuint tex,
     if (tet != NULL) {
 	pos = tet->pos;
 	rot = tet->rot;
-	size = {BND_SIZE, BND_SIZE};
+	size = {BND_SIZE, BND_SIZE, 1};
 	tileTexCoords = getTexCoords((unsigned)tet->type);
     } else {
-	size = {MAP_WIDTH, MAP_HEIGHT};
+	size = {MAP_WIDTH, MAP_HEIGHT, MAP_DEPTH};
     }
     unsigned block;
 
-    for (int y = 0; y < size.y; y++) {
-	for (int x = 0; x < size.x; x++) {
-	    block = grid[y * size.x + x];
-	    if (tet == NULL) {
-		if (x != 0 && x != size.x - 1)
-		    tileTexCoords = getTexCoords(block);
-		else
-		    continue;
-	    }
-	    if (((block >> rot) & 1) != 0 ||
-		(tet == NULL && block)) {
-		{
+    for (int z = 0; z < size.z; z++) {
+	for (int y = 0; y < size.y; y++) {
+	    for (int x = 0; x < size.x; x++) {
+		block = grid[(y * size.x + x) + MAP_WIDTH * MAP_HEIGHT * z];
+		if (tet == NULL) {
+		    if (x != 0 && x != size.x - 1
+			    && z != 0 && z != size.z - 1)
+			tileTexCoords = getTexCoords(block);
+		    else
+			continue;
+		}
+		if (((block >> rot) & 1) != 0 ||
+		    (tet == NULL && block)) {
 		    sp->use();
 
 		    glm::mat4 M = glm::mat4(1.f);
@@ -129,7 +150,7 @@ void drawGrid(ShaderProgram *sp, GLuint tex,
 		    M = glm::translate(M, glm::vec3(
 			2 * (float)(pos.x + x - x_shift),
 			2 * (float)(pos.y - y + y_shift), 
-			(float)pos.z));
+			2 * (float)(pos.z + z)));
 
 		    glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
 

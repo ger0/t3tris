@@ -18,5 +18,5 @@ void main() {
     i_normal	= normalize(mat3(transpose(inverse(V * M))) * normal.xyz);
     i_pos	= (V * M * vertex).xyz;
     iTexCoord 	= texCoord;
-    lightPos 	= vec3(V * vec4(0, 1, 2, 1));
+    lightPos 	= vec3(V * vec4(0, 10, 0, 1));
 }

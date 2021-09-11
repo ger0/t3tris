@@ -20,8 +20,10 @@
 
 ShaderProgram	*sp;
 GLuint		tex;
+// camera
 glm::vec3 cameraPos = glm::vec3(0.f, 0.f, 5.f);
 
+// tetrominos 
 Tetromino buff_piece;
 
 Tetromino curr_piece;
@@ -33,14 +35,15 @@ float lastX = 400, lastY = 350;
 
 // temp
 bool canSwap = true;
-// td move outside main
+
+// sets current / next piece 
 void setPieces() {
     curr_piece = next_piece;
 
     unsigned var = rand() % PIECES;
-    next_piece.type = T_type(var + 1);
+    next_piece.type = Block(var + 1);
     memcpy(next_piece.data, t_types + BND_AREA * var, BND_AREA);
-    next_piece.pos = {(MAP_WIDTH - 1) / 2, 0};
+    next_piece.pos = {(MAP_WIDTH - 1) / 2, 0, (MAP_DEPTH - 1) / 2};
     printf("NEXT PIECE: %i\n", next_piece.type);
     canSwap = true;
 }
@@ -67,7 +70,7 @@ void windowResizeCallback(GLFWwindow* window, int width, int height) {
 }
 void keyCallback(GLFWwindow* wnd, int key, int scancode, int act, int mod) {
     if (act == GLFW_PRESS) {
-	// rotation
+	// srs rotation
 	if (key == GLFW_KEY_Z)
 	    pieceRotate(curr_piece, -1);
 	if (key == GLFW_KEY_UP)
@@ -75,7 +78,7 @@ void keyCallback(GLFWwindow* wnd, int key, int scancode, int act, int mod) {
 	if (key == GLFW_KEY_A)
 	    map::chkCollision(curr_piece, {0, 0}, 2);
 
-	// position
+	// shift - position
 	if (key == GLFW_KEY_LEFT) {
 	    setShift(Left, curr_piece);
 	}
@@ -85,13 +88,20 @@ void keyCallback(GLFWwindow* wnd, int key, int scancode, int act, int mod) {
 	if (key == GLFW_KEY_DOWN) {
 	    setShiftDown();
 	}
+	// new depth shift 
+	if (key == GLFW_KEY_Q) {
+	    setShift(Far, curr_piece);
+	}
+	if (key == GLFW_KEY_W) {
+	    setShift(Close, curr_piece);
+	}
 	// hard drop
 	if (key == GLFW_KEY_SPACE) {
 	    while (!map::chkCollision(curr_piece, {0, -1}, 0));
 	    map::pushPiece(curr_piece);
 	    setPieces();
 	}
-
+	// buffer swapping 
 	if (key == GLFW_KEY_LEFT_SHIFT) {
 	    if (canSwap) {
 		if (buff_piece.type == 0) {
@@ -101,7 +111,7 @@ void keyCallback(GLFWwindow* wnd, int key, int scancode, int act, int mod) {
 		    std::swap(curr_piece, buff_piece);
 		    canSwap = false;
 		}
-		buff_piece.pos = {(MAP_WIDTH - 1) / 2, 0};
+		buff_piece.pos = {(MAP_WIDTH - 1) / 2, 0, (MAP_DEPTH - 1) / 2};
 		buff_piece.rot = 0;
 	    }
 	}
@@ -115,8 +125,15 @@ void keyCallback(GLFWwindow* wnd, int key, int scancode, int act, int mod) {
     if (act == GLFW_RELEASE) {
 	if (key == GLFW_KEY_LEFT) {
 	    resetShift(Left);
-	} else if (key == GLFW_KEY_RIGHT) {
+	}
+	if (key == GLFW_KEY_RIGHT) {
 	    resetShift(Right);
+	}
+	if (key == GLFW_KEY_W) {
+	    resetShift(Close);
+	}
+	if (key == GLFW_KEY_Q) {
+	    resetShift(Far);
 	}
 	if (key == GLFW_KEY_DOWN) {
 	    resetShift(Down);

@@ -1,10 +1,10 @@
 #pragma once
 
 // map definitions
-#define CELL_SIZE	32
+#define CELL_SIZE	64
 
-#define MAP_WIDTH	12
-#define MAP_HEIGHT	21
+#define MAP_WIDTH	8
+#define MAP_HEIGHT	16
 #define MAP_DEPTH	5
 
 #define SCALE		10
