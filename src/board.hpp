@@ -11,7 +11,7 @@
 #include "shaderprogram.hpp"
 
 namespace map {
-    extern byte data[MAP_WIDTH * MAP_HEIGHT];
+    extern byte data[MAP_WIDTH * MAP_HEIGHT * MAP_DEPTH];
     void	initMap();
     bool	chkCollision(Tetromino &tet, Position mov, int rot);
     void	pushPiece(Tetromino &tet);
