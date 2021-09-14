@@ -217,9 +217,9 @@ void drawScene(GLFWwindow* window) {
     glUniformMatrix4fv(sp->u("P"), 1, false, glm::value_ptr(P));
     glUniformMatrix3fv(sp->u("cameraPos"), 1, false, glm::value_ptr(cameraPos));
 
-    drawGrid(sp, tex, pack.grid, NULL, &pack);
+    //drawGrid(sp, tex, pack.grid, NULL, &pack);
     drawGrid(sp, tex, map::data);
-    //drawGrid(sp, tex, curr_piece.data, &curr_piece);
+    drawGrid(sp, tex, curr_piece.data, &curr_piece);
     
     // swap buffers
     glfwSwapBuffers(window);
