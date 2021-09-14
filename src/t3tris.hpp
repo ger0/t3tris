@@ -27,7 +27,18 @@ struct Position {
     int x;
     int y;
     int z = 0;
+
+    Position operator+(Position &a) {
+	return Position{
+	    this->x + a.x,
+	    this->y + a.y, 
+	    this->z + a.z
+	};
+    }
 };
+
+// for clarity
+typedef Position Dimensions;
 
 // different shapes for tetrominos
 enum Block {

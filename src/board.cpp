@@ -2,7 +2,6 @@
 
 byte map::data[MAP_WIDTH * MAP_HEIGHT * MAP_DEPTH] = {Block::EMPTY};
 
-// todo remov
 inline unsigned getMapIndex(unsigned x, unsigned y, unsigned z) {
     return y * MAP_WIDTH + x + MAP_WIDTH * MAP_HEIGHT * z;
 }
@@ -50,9 +49,7 @@ bool map::chkCollision(Tetromino &t, Position mov, int rot) {
 	    }
 	}
     }
-    t.pos.x += mov.x;
-    t.pos.y += mov.y;
-    t.pos.z += mov.z;
+    t.pos = t.pos + mov;
     if (rot)
 	t.rot = unsigned(t.rot + rot) % 4;
     return false;
@@ -108,8 +105,7 @@ inline float* getTexCoords(unsigned type) {
 }
 
 void drawGrid(ShaderProgram *sp, GLuint tex,
-	    byte grid[], Tetromino *tet) {
-
+	    byte grid[], Tetromino *tet, Pack *p) {
     float x_shift = (MAP_WIDTH 	- 1) / 2.0f;
     float y_shift = (MAP_HEIGHT - 1) / 2.0f;
 
@@ -118,22 +114,26 @@ void drawGrid(ShaderProgram *sp, GLuint tex,
     Position pos = {0, 0, 0};
     int	rot = 0;
     // size of bounding box
-    Position size;
+    Dimensions size;
     if (tet != NULL) {
 	pos = tet->pos;
 	rot = tet->rot;
 	size = {BND_SIZE, BND_SIZE, 1};
 	tileTexCoords = getTexCoords((unsigned)tet->type);
+    } else if (p != NULL) {
+	pos	= p->pos;
+	size	= p->size;
+	tileTexCoords = getTexCoords(p->type);
     } else {
-	size = {MAP_WIDTH, MAP_HEIGHT, MAP_DEPTH};
+	size = Dimensions{MAP_WIDTH, MAP_HEIGHT, MAP_DEPTH};
     }
     unsigned block;
 
     for (int z = 0; z < size.z; z++) {
 	for (int y = 0; y < size.y; y++) {
 	    for (int x = 0; x < size.x; x++) {
-		block = grid[(y * size.x + x) + MAP_WIDTH * MAP_HEIGHT * z];
-		if (tet == NULL) {
+		block = grid[(y * size.x + x) + size.x * size.y * z];
+		if (tet == NULL && p == NULL) {
 		    if (x != 0 && x != size.x - 1
 			    && z != 0 && z != size.z - 1)
 			tileTexCoords = getTexCoords(block);

@@ -8,6 +8,7 @@
 
 #include "t3tris.hpp"
 #include "shape.hpp"
+#include "pack.hpp"
 #include "shaderprogram.hpp"
 
 namespace map {
@@ -18,5 +19,5 @@ namespace map {
 }
 
 // draws a grid 
-void drawGrid(ShaderProgram *sp, GLuint tex, 
-	byte grid[], Tetromino *tet = NULL);
+void drawGrid(ShaderProgram *sp, GLuint tex, byte grid[],
+	Tetromino *tet = NULL, Pack *p = NULL);

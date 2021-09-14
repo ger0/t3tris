@@ -17,6 +17,7 @@
 #include "t3tris.hpp"
 #include "srs.hpp"
 #include "shift.hpp"
+#include "pack.hpp"
 
 ShaderProgram	*sp;
 GLuint		tex;
@@ -28,6 +29,20 @@ Tetromino buff_piece;
 
 Tetromino curr_piece;
 Tetromino next_piece;
+
+// debug
+std::vector<Position> test{
+	Position{0,0,0},
+	Position{1,0,0},
+	Position{0,1,0},
+	Position{0,0,1},
+	Position{1,1,0},
+	Position{1,0,1},
+	Position{0,1,1},
+	Position{1,1,1}
+    };
+				
+Pack pack(Position{(MAP_WIDTH - 1) / 2, -(MAP_HEIGHT - 1) / 2, (MAP_DEPTH - 1) / 2}, Block::T, test);
 
 // mouse 
 float pitch = 0.0f, yaw = 0.0f;
@@ -202,8 +217,9 @@ void drawScene(GLFWwindow* window) {
     glUniformMatrix4fv(sp->u("P"), 1, false, glm::value_ptr(P));
     glUniformMatrix3fv(sp->u("cameraPos"), 1, false, glm::value_ptr(cameraPos));
 
+    drawGrid(sp, tex, pack.grid, NULL, &pack);
     drawGrid(sp, tex, map::data);
-    drawGrid(sp, tex, curr_piece.data, &curr_piece);
+    //drawGrid(sp, tex, curr_piece.data, &curr_piece);
     
     // swap buffers
     glfwSwapBuffers(window);

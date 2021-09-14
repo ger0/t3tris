@@ -15,7 +15,7 @@ void main(void) {
 
 // ambient
     vec4 color 		= texture(texMap, iTexCoord);
-    vec3 ambient	= lightColor * 0.10;
+    vec3 ambient	= lightColor * 0.25;
 
 // diffuse
     vec3 lightDir	= normalize(lightPos - i_pos);
