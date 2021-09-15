@@ -9,9 +9,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-const int GR_WIDTH  = 3;
-const int GR_HEIGHT = 3;
-const int GR_DEPTH  = 3;
+const int GR_WIDTH  = 5;
+const int GR_HEIGHT = 5;
+const int GR_DEPTH  = 5;
 
 
 class Pack {
@@ -24,7 +24,8 @@ public:
     Block			type;		// type of the block 
 
     void update(); // updates grid on rotation 
-    void rotate(); // rotates all positions of the cells
+    void rotate(glm::vec3 rot); 		// rotates all positions of the cells
+    bool move(Position add_pos);		// moves to a certain position
     byte *grid;
 
     Pack(Position p, Block t, std::vector<glm::vec3> b);

@@ -32,11 +32,13 @@ Tetromino next_piece;
 
 // debug
 std::vector<glm::vec3> test{
-    glm::vec3(0,0,0),
-    glm::vec3(0,0,1)
+    glm::vec3(1,2,2),
+    glm::vec3(2,2,2),
+    glm::vec3(2,1,2),
+    glm::vec3(3,2,2),
     };
 				
-Pack pack(Position{(MAP_WIDTH - 1) / 2, -(MAP_HEIGHT - 1) / 2, (MAP_DEPTH - 1) / 2}, Block::T, test);
+Pack pack(Position{0,0,0}, Block::T, test);
 
 // mouse 
 float pitch = 0.0f, yaw = 0.0f;
@@ -80,29 +82,37 @@ void windowResizeCallback(GLFWwindow* window, int width, int height) {
 void keyCallback(GLFWwindow* wnd, int key, int scancode, int act, int mod) {
     if (act == GLFW_PRESS) {
 	// srs rotation
-	if (key == GLFW_KEY_Z)
-	    pieceRotate(curr_piece, -1);
-	if (key == GLFW_KEY_UP)
-	    pieceRotate(curr_piece, 1);
-	if (key == GLFW_KEY_A)
-	    map::chkCollision(curr_piece, {0, 0}, 2);
+	if (key == GLFW_KEY_Z) {
+	    //pieceRotate(curr_piece, -1);
+	    pack.rotate(glm::vec3(0,0,-1));
+	}
+	if (key == GLFW_KEY_UP) {
+	    //pieceRotate(curr_piece, 1);
+	    pack.rotate(glm::vec3(0,0,1));
+	}
+	if (key == GLFW_KEY_A) {
+	    //map::chkCollision(curr_piece, {0, 0}, 2);
+	}
 
 	// shift - position
 	if (key == GLFW_KEY_LEFT) {
-	    setShift(Left, curr_piece);
+	    //setShift(Left, curr_piece);
+	    pack.move(Position{-1,0,0});
 	}
 	if (key == GLFW_KEY_RIGHT) {
-	    setShift(Right, curr_piece);
+	    //setShift(Right, curr_piece);
+	    pack.move(Position{1,0,0});
+	}
+	if (key == GLFW_KEY_Q) {
+	    //setShift(Far, curr_piece);
+	    pack.move(Position{0,0,1});
+	}
+	if (key == GLFW_KEY_W) {
+	    //setShift(Close, curr_piece);
+	    pack.move(Position{0,0,-1});
 	}
 	if (key == GLFW_KEY_DOWN) {
 	    setShiftDown();
-	}
-	// new depth shift 
-	if (key == GLFW_KEY_Q) {
-	    setShift(Far, curr_piece);
-	}
-	if (key == GLFW_KEY_W) {
-	    setShift(Close, curr_piece);
 	}
 	// hard drop
 	if (key == GLFW_KEY_SPACE) {
