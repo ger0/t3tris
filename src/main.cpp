@@ -31,15 +31,9 @@ Tetromino curr_piece;
 Tetromino next_piece;
 
 // debug
-std::vector<Position> test{
-	Position{0,0,0},
-	Position{1,0,0},
-	Position{0,1,0},
-	Position{0,0,1},
-	Position{1,1,0},
-	Position{1,0,1},
-	Position{0,1,1},
-	Position{1,1,1}
+std::vector<glm::vec3> test{
+    glm::vec3(0,0,0),
+    glm::vec3(0,0,1)
     };
 				
 Pack pack(Position{(MAP_WIDTH - 1) / 2, -(MAP_HEIGHT - 1) / 2, (MAP_DEPTH - 1) / 2}, Block::T, test);
@@ -217,9 +211,9 @@ void drawScene(GLFWwindow* window) {
     glUniformMatrix4fv(sp->u("P"), 1, false, glm::value_ptr(P));
     glUniformMatrix3fv(sp->u("cameraPos"), 1, false, glm::value_ptr(cameraPos));
 
-    //drawGrid(sp, tex, pack.grid, NULL, &pack);
+    drawGrid(sp, tex, pack.grid, NULL, &pack);
     drawGrid(sp, tex, map::data);
-    drawGrid(sp, tex, curr_piece.data, &curr_piece);
+    //drawGrid(sp, tex, curr_piece.data, &curr_piece);
     
     // swap buffers
     glfwSwapBuffers(window);
@@ -261,7 +255,7 @@ int main() {
     double delta	= 0;
 
     double time_cap = 1.0 / 60.0;
-
+    //
     // main game loop
     while (!glfwWindowShouldClose(window)) {
 	time_after = glfwGetTime();
@@ -271,8 +265,10 @@ int main() {
 	glfwPollEvents();
 	while (delta >= 1.0) { 
 	    // update board
+	/*
 	    if (shiftUpdate(curr_piece))
 		setPieces();
+	*/
 	    delta--;
 	}
 	drawScene(window);

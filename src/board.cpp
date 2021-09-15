@@ -37,6 +37,12 @@ inline bool chkBND(Tetromino &tet, unsigned &x, unsigned &y, int rot = 0) {
     else 
 	return false;
 }
+bool map::isColliding(Position pos) {
+    if (map::data[getMapIndex(pos.x, pos.y, pos.z)] != Block::EMPTY)
+	return true;
+    else 
+	return false;
+}
 
 bool map::chkCollision(Tetromino &t, Position mov, int rot) { 
     for (unsigned y = 0; y < BND_SIZE; y++) {

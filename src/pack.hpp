@@ -1,29 +1,33 @@
 #pragma once 
 
 #include "t3tris.hpp"
+#include "board.hpp"
 
 #include <iostream>
 #include <vector>
 
-const int GR_WIDTH  = BND_SIZE;
-const int GR_HEIGHT = BND_SIZE;
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+const int GR_WIDTH  = 3;
+const int GR_HEIGHT = 3;
 const int GR_DEPTH  = 3;
 
 
 class Pack {
 private:
-    std::vector<Position>	cells;		// shape definition
+    std::vector<glm::vec3>	cells;		// shape definition
+    glm::vec3 			rotPivot;	// rotation pivot around the middle of the bounding box
 public:
     // variables
     Position 			pos;		// current position
-    Position 			nextPos;
-    Position 			rotAnch;	// rotation anchor
     Block			type;		// type of the block 
 
     void update(); // updates grid on rotation 
+    void rotate(); // rotates all positions of the cells
     byte *grid;
 
-    Pack(Position p, Block t, std::vector<Position> blocks);
+    Pack(Position p, Block t, std::vector<glm::vec3> b);
     ~Pack();
     
     // size of the grid[]

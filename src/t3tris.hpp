@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 // map definitions
 #define CELL_SIZE	64
 
@@ -13,7 +15,7 @@
 #define WND_WIDTH	CELL_SIZE * MAP_WIDTH
 #define WND_HEIGHT	CELL_SIZE * MAP_HEIGHT
 
-#define PI 3.141592653589793
+#define PI 3.141592653589793f
 
 // tetromino boundary 
 #define BND_SIZE 4
@@ -21,6 +23,8 @@
 #define PIECES 7
 
 typedef unsigned char byte;
+
+class Pack;
 
 // position on the map 
 struct Position {
@@ -99,3 +103,5 @@ const byte t_types[PIECES * BND_AREA] = {
 	 0, 0,  0, 0
 };
 
+namespace Pieces {
+};
