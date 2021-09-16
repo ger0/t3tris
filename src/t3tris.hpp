@@ -1,13 +1,14 @@
 #pragma once
 
 #include <vector>
+#include <glm/glm.hpp>
 
 // map definitions
 #define CELL_SIZE	64
 
-#define MAP_WIDTH	8
-#define MAP_HEIGHT	16
-#define MAP_DEPTH	5
+#define MAP_WIDTH	10
+#define MAP_HEIGHT	11
+#define MAP_DEPTH	10
 
 #define SCALE		10
 
@@ -32,7 +33,7 @@ struct Position {
     int y;
     int z = 0;
 
-    Position operator+(Position &a) {
+    Position operator+(Position a) {
 	return Position{
 	    this->x + a.x,
 	    this->y + a.y, 
@@ -102,6 +103,59 @@ const byte t_types[PIECES * BND_AREA] = {
 	 0, 14, 0, 0,
 	 0, 0,  0, 0
 };
-
+// 3D shapes
+// hardcoded to a bounding box of size 5
 namespace Pieces {
+    const std::vector<glm::vec3> O {
+	glm::vec3(1, 1, 2),
+	glm::vec3(2, 1, 2),
+	glm::vec3(1, 2, 2),
+	glm::vec3(2, 2, 2),
+	glm::vec3(1, 2, 1),
+	glm::vec3(2, 2, 1),
+	glm::vec3(1, 1, 1),
+	glm::vec3(2, 1, 1)
+    };
+
+    const std::vector<glm::vec3> I {
+	glm::vec3(0, 2, 2),
+	glm::vec3(1, 2, 2),
+	glm::vec3(2, 2, 2),
+	glm::vec3(3, 1, 2)
+    };
+
+    const std::vector<glm::vec3> L {
+	glm::vec3(1, 2, 2),
+	glm::vec3(2, 2, 2),
+	glm::vec3(3, 2, 2),
+	glm::vec3(3, 3, 2)
+    };
+
+    const std::vector<glm::vec3> J {
+	glm::vec3(1, 2, 2),
+	glm::vec3(1, 3, 2),
+	glm::vec3(2, 2, 2),
+	glm::vec3(3, 2, 2)
+    };
+
+    const std::vector<glm::vec3> Z {
+	glm::vec3(1, 3, 2),
+	glm::vec3(2, 3, 2),
+	glm::vec3(2, 2, 2),
+	glm::vec3(3, 2, 2)
+    };
+
+    const std::vector<glm::vec3> S {
+	glm::vec3(1, 2, 2),
+	glm::vec3(2, 2, 2),
+	glm::vec3(2, 3, 2),
+	glm::vec3(3, 3, 2)
+    };
+
+    const std::vector<glm::vec3> T {
+	glm::vec3(1, 2, 2),
+	glm::vec3(2, 2, 2),
+	glm::vec3(2, 1, 2),
+	glm::vec3(2, 2, 3)
+    };
 };

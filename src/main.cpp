@@ -31,14 +31,10 @@ Tetromino curr_piece;
 Tetromino next_piece;
 
 // debug
-std::vector<glm::vec3> test{
-    glm::vec3(1,2,2),
-    glm::vec3(2,2,2),
-    glm::vec3(2,1,2),
-    glm::vec3(3,2,2),
-    };
-				
-Pack pack(Position{0,0,0}, Block::T, test);
+Pack *pack = new Pack(Block::T, Pieces::L);
+Pack *next = new Pack(Block::T, Pieces::L);
+
+Pack *buff = new Pack(Block::T, Pieces::L);
 
 // mouse 
 float pitch = 0.0f, yaw = 0.0f;
@@ -84,44 +80,57 @@ void keyCallback(GLFWwindow* wnd, int key, int scancode, int act, int mod) {
 	// srs rotation
 	if (key == GLFW_KEY_Z) {
 	    //pieceRotate(curr_piece, -1);
-	    pack.rotate(glm::vec3(0,0,-1));
+	    pack->rotate(glm::vec3(0,0,-1));
 	}
 	if (key == GLFW_KEY_UP) {
 	    //pieceRotate(curr_piece, 1);
-	    pack.rotate(glm::vec3(0,0,1));
+	    pack->rotate(glm::vec3(0,0,1));
 	}
-	if (key == GLFW_KEY_A) {
+	if (key == GLFW_KEY_S) {
 	    //map::chkCollision(curr_piece, {0, 0}, 2);
+	    pack->rotate(glm::vec3(1,0,0));
+	}
+	if (key == GLFW_KEY_X) {
+	    //map::chkCollision(curr_piece, {0, 0}, 2);
+	    pack->rotate(glm::vec3(-1,0,0));
 	}
 
 	// shift - position
 	if (key == GLFW_KEY_LEFT) {
 	    //setShift(Left, curr_piece);
-	    pack.move(Position{-1,0,0});
+	    pack->move(Position{-1,0,0});
 	}
 	if (key == GLFW_KEY_RIGHT) {
 	    //setShift(Right, curr_piece);
-	    pack.move(Position{1,0,0});
+	    pack->move(Position{1,0,0});
 	}
 	if (key == GLFW_KEY_Q) {
 	    //setShift(Far, curr_piece);
-	    pack.move(Position{0,0,1});
+	    pack->move(Position{0,0,1});
 	}
 	if (key == GLFW_KEY_W) {
 	    //setShift(Close, curr_piece);
-	    pack.move(Position{0,0,-1});
+	    pack->move(Position{0,0,-1});
 	}
 	if (key == GLFW_KEY_DOWN) {
-	    setShiftDown();
+	    //setShiftDown();
+	    pack->move(Position{0,-1,0});
 	}
 	// hard drop
 	if (key == GLFW_KEY_SPACE) {
+	    /*
 	    while (!map::chkCollision(curr_piece, {0, -1}, 0));
 	    map::pushPiece(curr_piece);
 	    setPieces();
+	    */
+	    while (pack->move(Position{0,-1,0}));
+	    pack->pushPiece();
+	    delete pack;
+	    pack = new Pack(T, Pieces::T);
 	}
 	// buffer swapping 
 	if (key == GLFW_KEY_LEFT_SHIFT) {
+	    /*
 	    if (canSwap) {
 		if (buff_piece.type == 0) {
 		    buff_piece = curr_piece;
@@ -133,13 +142,13 @@ void keyCallback(GLFWwindow* wnd, int key, int scancode, int act, int mod) {
 		buff_piece.pos = {(MAP_WIDTH - 1) / 2, 0, (MAP_DEPTH - 1) / 2};
 		buff_piece.rot = 0;
 	    }
+	    */
 	}
-	/* debug
 	if (key == GLFW_KEY_ENTER) {
-	    map::pushPiece(curr_piece);
-	    setPieces();
+	    pack->pushPiece();
+	    delete pack;
+	    pack = new Pack(O, Pieces::S);
 	}
-	*/
     }
     if (act == GLFW_RELEASE) {
 	if (key == GLFW_KEY_LEFT) {
@@ -221,9 +230,8 @@ void drawScene(GLFWwindow* window) {
     glUniformMatrix4fv(sp->u("P"), 1, false, glm::value_ptr(P));
     glUniformMatrix3fv(sp->u("cameraPos"), 1, false, glm::value_ptr(cameraPos));
 
-    drawGrid(sp, tex, pack.grid, NULL, &pack);
+    drawGrid(sp, tex, pack->grid, NULL, pack);
     drawGrid(sp, tex, map::data);
-    //drawGrid(sp, tex, curr_piece.data, &curr_piece);
     
     // swap buffers
     glfwSwapBuffers(window);
@@ -256,8 +264,8 @@ int main() {
     initProgram(window);
    
     // lol
-    setPieces();
-    setPieces();
+    //setPieces();
+    //setPieces();
 
     double time_after	= glfwGetTime();
     double time_before	= glfwGetTime();

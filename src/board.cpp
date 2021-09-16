@@ -7,27 +7,30 @@ inline unsigned getMapIndex(unsigned x, unsigned y, unsigned z) {
 }
 
 void map::initMap() {
-    unsigned map_plane = MAP_WIDTH * MAP_HEIGHT;
-    if (MAP_WIDTH * MAP_HEIGHT * MAP_DEPTH != 0) {
-	for (unsigned i = 0; i < MAP_HEIGHT; i++) {
-	    for (unsigned j = 0; j < MAP_DEPTH; j++) {
-		map::data[i * MAP_WIDTH +
-			    map_plane * j] = Block::WALL;
-		map::data[(i * MAP_WIDTH + MAP_WIDTH - 1) + 
-			    map_plane * j] = Block::WALL;
-	    }
-	}
-	for (unsigned i = 0; i < MAP_WIDTH; i++) {
-	    for (unsigned j = 0; j < MAP_DEPTH; j++){
-		map::data[(i + MAP_WIDTH * (MAP_HEIGHT - 1)) +
-			    map_plane * j] = Block::WALL;
-	    }
-	}
-	for (unsigned i = 0; i < MAP_WIDTH * MAP_HEIGHT; i++) {
-	    map::data[i] = Block::WALL;
-	    map::data[i + MAP_WIDTH * MAP_HEIGHT * (MAP_DEPTH - 1)] = Block::WALL;
+    // bottom wall
+    for (unsigned z = 0; z < MAP_DEPTH; z++) {
+	for (unsigned x = 0; x < MAP_WIDTH; x++) {
+	    map::data[getMapIndex(x, 0, z)] = (byte)Block::WALL;
 	}
     }
+    // side walls 
+    // x = 0 & x = max
+    for (unsigned z = 0; z < MAP_DEPTH; z++) {
+	for (unsigned y = 0; y < MAP_HEIGHT; y++) {
+	    map::data[getMapIndex(0, y, z)] = (byte)Block::WALL;
+	    map::data[getMapIndex(MAP_WIDTH - 1, y, z)] = (byte)Block::WALL;
+	}
+    }
+    // z = 0 & z = max
+    for (unsigned y = 0; y < MAP_HEIGHT; y++) {
+	for (unsigned x = 0; x < MAP_WIDTH; x++) {
+	    map::data[getMapIndex(x, y, 0)] = (byte)Block::WALL;
+	    map::data[getMapIndex(x, y, MAP_DEPTH - 1)] = (byte)Block::WALL;
+	}
+    }
+   // debug 
+    map::data[getMapIndex(1,0,1)] = Block::O;
+    map::data[getMapIndex(MAP_WIDTH - 2,MAP_HEIGHT - 1, MAP_DEPTH - 2)] = Block::I;
 }
 
 inline bool chkBND(Tetromino &tet, unsigned &x, unsigned &y, int rot = 0) {
@@ -38,10 +41,17 @@ inline bool chkBND(Tetromino &tet, unsigned &x, unsigned &y, int rot = 0) {
 	return false;
 }
 bool map::isColliding(Position pos) {
-    if (map::data[getMapIndex(pos.x, pos.y, pos.z)] != Block::EMPTY)
+    if (pos.x >= MAP_WIDTH  || pos.x < 0 ||
+	    pos.y >= MAP_HEIGHT || pos.y < 0 ||
+	    pos.z >= MAP_DEPTH  || pos.z < 0) {
+	printf("COLLISION: position outside map box, x: %i, y: %i, z: %i\n", 
+		pos.x, pos.y, pos.z);
 	return true;
-    else 
+    } else if (map::data[getMapIndex(pos.x, pos.y, pos.z)] != Block::EMPTY) {
+	return true;
+    } else {
 	return false;
+    }
 }
 
 bool map::chkCollision(Tetromino &t, Position mov, int rot) { 
@@ -90,6 +100,10 @@ void lineCheck() {
     }
 }
 
+void map::pushPiece(Block b, Position pos) {
+    map::data[getMapIndex(pos.x, pos.y, pos.z)] = (byte)b;
+}
+
 void map::pushPiece(Tetromino &t) {
     for (unsigned y = 0; y < BND_SIZE; y++) {
 	for (unsigned x = 0; x < BND_SIZE; x++) {
@@ -114,6 +128,7 @@ void drawGrid(ShaderProgram *sp, GLuint tex,
 	    byte grid[], Tetromino *tet, Pack *p) {
     float x_shift = (MAP_WIDTH 	- 1) / 2.0f;
     float y_shift = (MAP_HEIGHT - 1) / 2.0f;
+    float z_shift = (MAP_DEPTH  - 1) / 2.0f;
 
     float *tileTexCoords;
 
@@ -155,8 +170,8 @@ void drawGrid(ShaderProgram *sp, GLuint tex,
 		    M = glm::scale(M, glm::vec3(1.f / SCALE, 1.f / SCALE, 1.f / SCALE));
 		    M = glm::translate(M, glm::vec3(
 			2 * (float)(pos.x + x - x_shift),
-			2 * (float)(pos.y - y + y_shift), 
-			2 * (float)(pos.z + z)));
+			2 * (float)(pos.y + y - y_shift), 
+			2 * (float)(pos.z + z - z_shift)));
 
 		    glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
 
@@ -180,9 +195,12 @@ void drawGrid(ShaderProgram *sp, GLuint tex,
 		    glDisableVertexAttribArray(sp->a("normal"));
 		    glDisableVertexAttribArray(sp->a("texCoord"));
 		    glDisableVertexAttribArray(sp->a("vertex"));
+		    if (tet == NULL && p == NULL)
+			free(tileTexCoords);
 		}
 	    }
 	}
     }
-    free(tileTexCoords);
+    if (tet != NULL || p != NULL)
+	free(tileTexCoords);
 }
