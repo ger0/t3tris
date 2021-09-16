@@ -6,9 +6,9 @@
 // map definitions
 #define CELL_SIZE	64
 
-#define MAP_WIDTH	10
-#define MAP_HEIGHT	11
-#define MAP_DEPTH	10
+#define MAP_WIDTH	5
+#define MAP_HEIGHT	15
+#define MAP_DEPTH	6
 
 #define SCALE		10
 
@@ -121,7 +121,7 @@ namespace Pieces {
 	glm::vec3(0, 2, 2),
 	glm::vec3(1, 2, 2),
 	glm::vec3(2, 2, 2),
-	glm::vec3(3, 1, 2)
+	glm::vec3(3, 2, 2)
     };
 
     const std::vector<glm::vec3> L {

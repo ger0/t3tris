@@ -16,6 +16,7 @@ namespace map {
     void	initMap();
     bool	isColliding(Position pos);
     void	pushPiece(Block b, Position pos);
+    void 	lineCheck();
 
     void	pushPiece(Tetromino &tet);
     bool	chkCollision(Tetromino &tet, Position mov, int rot);

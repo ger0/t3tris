@@ -24,7 +24,8 @@ int getIndex(int x, int y, int z) {
 
 Pack::Pack(Block t, std::vector<glm::vec3> b) : 
     cells(b), type(t) {
-    pos = Position{(MAP_WIDTH - 1) / 2, (MAP_HEIGHT - GR_HEIGHT), (MAP_DEPTH - 1) / 2};
+    //pos = Position{(MAP_WIDTH - 1) / 2, (MAP_HEIGHT - GR_HEIGHT), (MAP_DEPTH - 1) / 2};
+    pos = Position{(MAP_WIDTH - GR_WIDTH) / 2, (MAP_HEIGHT - GR_HEIGHT), (MAP_DEPTH - GR_DEPTH) / 2};
     rotPivot = glm::vec3(
 	    (GR_WIDTH  - 1) / 2, 
 	    (GR_HEIGHT - 1) / 2, 
@@ -41,6 +42,7 @@ Pack::Pack(Block t, std::vector<glm::vec3> b) :
 	    printf("Pack ERROR\n");
 	}
     }
+    clearGrid(grid);
     update();
 }
 
@@ -96,6 +98,7 @@ void Pack::pushPiece() {
     for (auto i : cells) {
 	map::pushPiece(type, vec3_to_pos(i) + pos);
     }
+    map::lineCheck();
 }
 //debug
 void Pack::print_pos() { 

@@ -31,10 +31,10 @@ Tetromino curr_piece;
 Tetromino next_piece;
 
 // debug
-Pack *pack = new Pack(Block::T, Pieces::L);
-Pack *next = new Pack(Block::T, Pieces::L);
+Pack *pack = new Pack(Block::T, Pieces::I);
+Pack *next = new Pack(Block::T, Pieces::I);
 
-Pack *buff = new Pack(Block::T, Pieces::L);
+Pack *buff = new Pack(Block::T, Pieces::I);
 
 // mouse 
 float pitch = 0.0f, yaw = 0.0f;
@@ -126,7 +126,7 @@ void keyCallback(GLFWwindow* wnd, int key, int scancode, int act, int mod) {
 	    while (pack->move(Position{0,-1,0}));
 	    pack->pushPiece();
 	    delete pack;
-	    pack = new Pack(T, Pieces::T);
+	    pack = new Pack(I, Pieces::I);
 	}
 	// buffer swapping 
 	if (key == GLFW_KEY_LEFT_SHIFT) {
