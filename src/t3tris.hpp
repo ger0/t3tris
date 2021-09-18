@@ -8,7 +8,7 @@
 
 #define MAP_WIDTH	5
 #define MAP_HEIGHT	15
-#define MAP_DEPTH	6
+#define MAP_DEPTH	5
 
 #define SCALE		10
 
@@ -65,7 +65,7 @@ struct Tetromino {
     byte	data[BND_AREA];	
 };
 // 4 bits are used - 1 bit for every rotation 
-// Will be removed later on
+// old 2D representation of the original tetrominos
 const byte t_types[PIECES * BND_AREA] = {
     // O shape
 	0, 0,  0,  0,
@@ -106,7 +106,9 @@ const byte t_types[PIECES * BND_AREA] = {
 // 3D shapes
 // hardcoded to a bounding box of size 5
 namespace Pieces {
-    const std::vector<glm::vec3> O {
+const std::vector<std::vector<glm::vec3>> piece {
+    // O
+    std::vector<glm::vec3> {
 	glm::vec3(1, 1, 2),
 	glm::vec3(2, 1, 2),
 	glm::vec3(1, 2, 2),
@@ -115,47 +117,48 @@ namespace Pieces {
 	glm::vec3(2, 2, 1),
 	glm::vec3(1, 1, 1),
 	glm::vec3(2, 1, 1)
-    };
-
-    const std::vector<glm::vec3> I {
+    },
+    // I
+    std::vector<glm::vec3> {
 	glm::vec3(0, 2, 2),
 	glm::vec3(1, 2, 2),
 	glm::vec3(2, 2, 2),
 	glm::vec3(3, 2, 2)
-    };
-
-    const std::vector<glm::vec3> L {
+    },
+    // L
+    std::vector<glm::vec3> {
 	glm::vec3(1, 2, 2),
 	glm::vec3(2, 2, 2),
 	glm::vec3(3, 2, 2),
 	glm::vec3(3, 3, 2)
-    };
-
-    const std::vector<glm::vec3> J {
+    },
+    // J
+    std::vector<glm::vec3> {
 	glm::vec3(1, 2, 2),
 	glm::vec3(1, 3, 2),
 	glm::vec3(2, 2, 2),
 	glm::vec3(3, 2, 2)
-    };
-
-    const std::vector<glm::vec3> Z {
+    },
+    // Z
+    std::vector<glm::vec3> {
 	glm::vec3(1, 3, 2),
 	glm::vec3(2, 3, 2),
 	glm::vec3(2, 2, 2),
 	glm::vec3(3, 2, 2)
-    };
-
-    const std::vector<glm::vec3> S {
+    },
+    // S
+    std::vector<glm::vec3> {
 	glm::vec3(1, 2, 2),
 	glm::vec3(2, 2, 2),
 	glm::vec3(2, 3, 2),
 	glm::vec3(3, 3, 2)
-    };
-
-    const std::vector<glm::vec3> T {
+    },
+    // T
+    std::vector<glm::vec3> {
 	glm::vec3(1, 2, 2),
 	glm::vec3(2, 2, 2),
 	glm::vec3(2, 1, 2),
 	glm::vec3(2, 2, 3)
-    };
+    }
+};
 };
