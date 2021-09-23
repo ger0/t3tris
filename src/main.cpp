@@ -21,28 +21,14 @@
 
 ShaderProgram	*sp;
 GLuint		tex;
-// camera
+// funky camera
 glm::vec3 cameraPos = glm::vec3(0.f, 0.f, 5.f);
 
-// tetrominos 
-Tetromino buff_piece;
-
-Tetromino curr_piece;
-Tetromino next_piece;
-
 // debug
-std::vector<Position> test{
-	Position{0,0,0},
-	Position{1,0,0},
-	Position{0,1,0},
-	Position{0,0,1},
-	Position{1,1,0},
-	Position{1,0,1},
-	Position{0,1,1},
-	Position{1,1,1}
-    };
-				
-Pack pack(Position{(MAP_WIDTH - 1) / 2, -(MAP_HEIGHT - 1) / 2, (MAP_DEPTH - 1) / 2}, Block::T, test);
+Pack *pack = NULL;
+Pack *next = NULL;
+
+Pack *buff = NULL;
 
 // mouse 
 float pitch = 0.0f, yaw = 0.0f;
@@ -53,13 +39,17 @@ bool canSwap = true;
 
 // sets current / next piece 
 void setPieces() {
-    curr_piece = next_piece;
-
+    // fresh start 
     unsigned var = rand() % PIECES;
-    next_piece.type = Block(var + 1);
-    memcpy(next_piece.data, t_types + BND_AREA * var, BND_AREA);
-    next_piece.pos = {(MAP_WIDTH - 1) / 2, 0, (MAP_DEPTH - 1) / 2};
-    printf("NEXT PIECE: %i\n", next_piece.type);
+    if (pack == NULL) {
+	next = new Pack(Block(var + 1), Pieces::piece[var]);	
+	var = rand() % PIECES;
+	pack = new Pack(Block(var + 1), Pieces::piece[var]);
+    } else {
+	delete pack;
+	pack = next;
+	next = new Pack(Block(var + 1), Pieces::piece[var]);
+    }
     canSwap = true;
 }
 // callbacks	-------------------------------------------------------
@@ -86,56 +76,63 @@ void windowResizeCallback(GLFWwindow* window, int width, int height) {
 void keyCallback(GLFWwindow* wnd, int key, int scancode, int act, int mod) {
     if (act == GLFW_PRESS) {
 	// srs rotation
-	if (key == GLFW_KEY_Z)
-	    pieceRotate(curr_piece, -1);
-	if (key == GLFW_KEY_UP)
-	    pieceRotate(curr_piece, 1);
-	if (key == GLFW_KEY_A)
-	    map::chkCollision(curr_piece, {0, 0}, 2);
+	if (key == GLFW_KEY_Z) {
+	    pack->rotate(glm::vec3(0,0,1));
+	}
+	if (key == GLFW_KEY_UP) {
+	    pack->rotate(glm::vec3(0,0,-1));
+	}
+	if (key == GLFW_KEY_S) {
+	    pack->rotate(glm::vec3(1,0,0));
+	}
+	if (key == GLFW_KEY_X) {
+	    pack->rotate(glm::vec3(-1,0,0));
+	}
 
 	// shift - position
 	if (key == GLFW_KEY_LEFT) {
-	    setShift(Left, curr_piece);
+	    setShift(Left, pack);
+	    //pack->move(Position{-1,0,0});
 	}
 	if (key == GLFW_KEY_RIGHT) {
-	    setShift(Right, curr_piece);
+	    setShift(Right, pack);
+	    //pack->move(Position{1,0,0});
+	}
+	if (key == GLFW_KEY_Q) {
+	    setShift(Far, pack);
+	    //pack->move(Position{0,0,1});
+	}
+	if (key == GLFW_KEY_W) {
+	    setShift(Close, pack);
+	    //pack->move(Position{0,0,-1});
 	}
 	if (key == GLFW_KEY_DOWN) {
 	    setShiftDown();
-	}
-	// new depth shift 
-	if (key == GLFW_KEY_Q) {
-	    setShift(Far, curr_piece);
-	}
-	if (key == GLFW_KEY_W) {
-	    setShift(Close, curr_piece);
+	    //pack->move(Position{0,-1,0});
 	}
 	// hard drop
 	if (key == GLFW_KEY_SPACE) {
-	    while (!map::chkCollision(curr_piece, {0, -1}, 0));
-	    map::pushPiece(curr_piece);
+	    while (pack->move(Position{0,-1,0}));
+	    pack->pushPiece();
 	    setPieces();
 	}
 	// buffer swapping 
 	if (key == GLFW_KEY_LEFT_SHIFT) {
 	    if (canSwap) {
-		if (buff_piece.type == 0) {
-		    buff_piece = curr_piece;
+		if (buff == NULL) {
+		    buff = pack;
 		    setPieces();
 		} else {
-		    std::swap(curr_piece, buff_piece);
-		    canSwap = false;
+		    Pack *temp = pack;
+		    pack = buff;
+		    buff = temp;
 		}
-		buff_piece.pos = {(MAP_WIDTH - 1) / 2, 0, (MAP_DEPTH - 1) / 2};
-		buff_piece.rot = 0;
+	    canSwap = false;
 	    }
 	}
-	/* debug
 	if (key == GLFW_KEY_ENTER) {
-	    map::pushPiece(curr_piece);
-	    setPieces();
+	    pack->pushPiece();
 	}
-	*/
     }
     if (act == GLFW_RELEASE) {
 	if (key == GLFW_KEY_LEFT) {
@@ -217,9 +214,8 @@ void drawScene(GLFWwindow* window) {
     glUniformMatrix4fv(sp->u("P"), 1, false, glm::value_ptr(P));
     glUniformMatrix3fv(sp->u("cameraPos"), 1, false, glm::value_ptr(cameraPos));
 
-    //drawGrid(sp, tex, pack.grid, NULL, &pack);
+    drawGrid(sp, tex, pack->grid, NULL, pack);
     drawGrid(sp, tex, map::data);
-    drawGrid(sp, tex, curr_piece.data, &curr_piece);
     
     // swap buffers
     glfwSwapBuffers(window);
@@ -251,8 +247,6 @@ int main() {
     }
     initProgram(window);
    
-    // lol
-    setPieces();
     setPieces();
 
     double time_after	= glfwGetTime();
@@ -261,7 +255,7 @@ int main() {
     double delta	= 0;
 
     double time_cap = 1.0 / 60.0;
-
+    //
     // main game loop
     while (!glfwWindowShouldClose(window)) {
 	time_after = glfwGetTime();
@@ -271,8 +265,9 @@ int main() {
 	glfwPollEvents();
 	while (delta >= 1.0) { 
 	    // update board
-	    if (shiftUpdate(curr_piece))
+	    if (shiftUpdate(pack)) {
 		setPieces();
+	    }
 	    delta--;
 	}
 	drawScene(window);

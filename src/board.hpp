@@ -14,8 +14,12 @@
 namespace map {
     extern byte data[MAP_WIDTH * MAP_HEIGHT * MAP_DEPTH];
     void	initMap();
-    bool	chkCollision(Tetromino &tet, Position mov, int rot);
+    bool	isColliding(Position pos);
+    void	pushPiece(Block b, Position pos);
+    void 	lineCheck();
+
     void	pushPiece(Tetromino &tet);
+    bool	chkCollision(Tetromino &tet, Position mov, int rot);
 }
 
 // draws a grid 

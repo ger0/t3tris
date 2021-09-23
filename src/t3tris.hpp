@@ -1,10 +1,13 @@
 #pragma once
 
+#include <vector>
+#include <glm/glm.hpp>
+
 // map definitions
 #define CELL_SIZE	64
 
-#define MAP_WIDTH	8
-#define MAP_HEIGHT	16
+#define MAP_WIDTH	5
+#define MAP_HEIGHT	15
 #define MAP_DEPTH	5
 
 #define SCALE		10
@@ -13,7 +16,7 @@
 #define WND_WIDTH	CELL_SIZE * MAP_WIDTH
 #define WND_HEIGHT	CELL_SIZE * MAP_HEIGHT
 
-#define PI 3.141592653589793
+#define PI 3.141592653589793f
 
 // tetromino boundary 
 #define BND_SIZE 4
@@ -22,13 +25,15 @@
 
 typedef unsigned char byte;
 
+class Pack;
+
 // position on the map 
 struct Position {
     int x;
     int y;
     int z = 0;
 
-    Position operator+(Position &a) {
+    Position operator+(Position a) {
 	return Position{
 	    this->x + a.x,
 	    this->y + a.y, 
@@ -60,7 +65,7 @@ struct Tetromino {
     byte	data[BND_AREA];	
 };
 // 4 bits are used - 1 bit for every rotation 
-// Will be removed later on
+// old 2D representation of the original tetrominos
 const byte t_types[PIECES * BND_AREA] = {
     // O shape
 	0, 0,  0,  0,
@@ -98,4 +103,62 @@ const byte t_types[PIECES * BND_AREA] = {
 	 0, 14, 0, 0,
 	 0, 0,  0, 0
 };
-
+// 3D shapes
+// hardcoded to a bounding box of size 5
+namespace Pieces {
+const std::vector<std::vector<glm::vec3>> piece {
+    // O
+    std::vector<glm::vec3> {
+	glm::vec3(1, 1, 2),
+	glm::vec3(2, 1, 2),
+	glm::vec3(1, 2, 2),
+	glm::vec3(2, 2, 2),
+	glm::vec3(1, 2, 1),
+	glm::vec3(2, 2, 1),
+	glm::vec3(1, 1, 1),
+	glm::vec3(2, 1, 1)
+    },
+    // I
+    std::vector<glm::vec3> {
+	glm::vec3(0, 2, 2),
+	glm::vec3(1, 2, 2),
+	glm::vec3(2, 2, 2),
+	glm::vec3(3, 2, 2)
+    },
+    // L
+    std::vector<glm::vec3> {
+	glm::vec3(1, 2, 2),
+	glm::vec3(2, 2, 2),
+	glm::vec3(3, 2, 2),
+	glm::vec3(3, 3, 2)
+    },
+    // J
+    std::vector<glm::vec3> {
+	glm::vec3(1, 2, 2),
+	glm::vec3(1, 3, 2),
+	glm::vec3(2, 2, 2),
+	glm::vec3(3, 2, 2)
+    },
+    // Z
+    std::vector<glm::vec3> {
+	glm::vec3(1, 3, 2),
+	glm::vec3(2, 3, 2),
+	glm::vec3(2, 2, 2),
+	glm::vec3(3, 2, 2)
+    },
+    // S
+    std::vector<glm::vec3> {
+	glm::vec3(1, 2, 2),
+	glm::vec3(2, 2, 2),
+	glm::vec3(2, 3, 2),
+	glm::vec3(3, 3, 2)
+    },
+    // T
+    std::vector<glm::vec3> {
+	glm::vec3(1, 2, 2),
+	glm::vec3(2, 2, 2),
+	glm::vec3(2, 1, 2),
+	glm::vec3(2, 2, 3)
+    }
+};
+};
