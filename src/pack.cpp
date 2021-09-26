@@ -5,11 +5,11 @@ inline void clearGrid(byte *grid) {
 	grid[i] = (byte)Block::EMPTY;
     }
 }
-inline int round(float f) {
-    return (int)(f + 0.8f);
-}
 inline Position vec3_to_pos(glm::vec3 vec) {
     return Position{round(vec.x), round(vec.y), round(vec.z)};
+}
+inline Rotation vec3_to_rot(glm::vec3 vec) {
+    return {int(vec.x), int(vec.y), int(vec.z)};
 }
 
 int getIndex(int x, int y, int z) {
@@ -21,11 +21,13 @@ int getIndex(int x, int y, int z) {
 	return y * GR_WIDTH + x + GR_WIDTH * GR_HEIGHT * z;
     }
 }
+void Pack::resetPos() {
+    pos = Position{(MAP_WIDTH - GR_WIDTH) / 2, (MAP_HEIGHT - GR_HEIGHT), (MAP_DEPTH - GR_DEPTH) / 2};
+}
 
 Pack::Pack(Block t, std::vector<glm::vec3> b) : 
-    cells(b), type(t) {
-    //pos = Position{(MAP_WIDTH - 1) / 2, (MAP_HEIGHT - GR_HEIGHT), (MAP_DEPTH - 1) / 2};
-    pos = Position{(MAP_WIDTH - GR_WIDTH) / 2, (MAP_HEIGHT - GR_HEIGHT), (MAP_DEPTH - GR_DEPTH) / 2};
+    cells(b), type(t), rot_state({0, 0, 0}) {
+    resetPos();
     rotPivot = glm::vec3(
 	    (GR_WIDTH  - 1) / 2, 
 	    (GR_HEIGHT - 1) / 2, 
@@ -59,28 +61,49 @@ void Pack::update() {
     }
 }
 void Pack::rotate(glm::vec3 rot) {
+    Rotation newR_state = vec3_to_rot(rot);
+    //printf("\nrotation: %i %i %i\n", newR_state.x, newR_state.y, newR_state.z);
+
     glm::mat4 rotMat(1);
     rotMat = glm::translate(rotMat, rotPivot);
-    rotMat = glm::rotate(rotMat, PI / 2, rot);
+    rotMat = glm::rotate(rotMat, PI / 2.f, rot);
     rotMat = glm::translate(rotMat, -rotPivot);
     
-    Position t = {0, 0, 0}; 			// test
+    Position shift	= {0, 0, 0};			// current srs shift 
+    Position t		= {0, 0, 0}; 			// temp variable
     std::vector<glm::vec3> new_cells;
     glm::vec3 vec;
 
-    for (auto old : cells) {
-	vec = glm::vec3(rotMat * glm::vec4(old, 1.f));
+    bool nextTry;
 
-	t = vec3_to_pos(vec);
-	t = t + pos;
+    for (unsigned i = 0; i < TEST_COUNT; i++) {
+	//printf("i: %i\n", i);
+	shift = getRotShift(type, i, newR_state, rot_state);
+	//printf("shift: %i %i %i\n", shift.x, shift.y, shift.z);
+	nextTry = false;
+	for (auto old : cells) {
+	    vec = glm::vec3(rotMat * glm::vec4(old, 1.f));
 
-	if (map::isColliding(t)) {
+	    t = vec3_to_pos(vec);
+	    t = t + pos + shift;
+
+	    if (map::isColliding(t)) {
+		nextTry = true;
+		break;
+	    }
+	    new_cells.push_back(vec);
+	}
+	if (!nextTry) {
+	    rot_state = rot_state + newR_state;
+	    rot_state = rot_state % 4;
+
+	    pos = pos + shift;
+
+	    cells = new_cells;
+	    update();
 	    return;
 	}
-	new_cells.push_back(vec);
     }
-    cells = new_cells;
-    update();
 }
 
 bool Pack::move(Position add_pos) {

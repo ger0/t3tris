@@ -17,8 +17,6 @@ enum Shift {
 };
 
 void resetShift(Shift dir);
-void setShift(Shift dir, Tetromino &curr);
-bool shiftUpdate(Tetromino &curr);
 void setShiftDown();
 
 void setShift(Shift dir, Pack *curr);

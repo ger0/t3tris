@@ -2,6 +2,7 @@
 
 #include "t3tris.hpp"
 #include "board.hpp"
+#include "srs.hpp"
 
 #include <iostream>
 #include <vector>
@@ -13,7 +14,6 @@ const int GR_WIDTH  = 5;
 const int GR_HEIGHT = 5;
 const int GR_DEPTH  = 5;
 
-
 class Pack {
 private:
     std::vector<glm::vec3>	cells;		// shape definition
@@ -23,10 +23,12 @@ public:
     // variables
     Position 			pos;		// current position
     Block			type;		// type of the block 
+    Rotation			rot_state;	// current rotation around {x y z} axis
 
     void rotate(glm::vec3 rot); 		// rotates all positions of the cells
     bool move(Position add_pos);		// moves to a certain position
     void pushPiece();
+    void resetPos();
     byte *grid;
 
     Pack(Block t, std::vector<glm::vec3> b);

@@ -1,28 +1,33 @@
 #include "srs.hpp"
 
-inline Position getKickData(unsigned &i, Tetromino &tet, int &rot, const Position *data) {
-    unsigned rotation = i + TEST_COUNT * (unsigned(tet.rot + rot) % ROTATIONS);
-    if (rot >= 0) {
-	return data[rotation];
+int extract(Rotation newRot, Rotation rot) {
+    Rotation t = newRot + rot;
+    t = t % 4;
+    if (t.x > 0) { 
+	return t.x;
+    } else if (t.y > 0) {
+	return t.y;
     } else {
-	return Position{-data[rotation].x, -data[rotation].y};
+	return t.z;
     }
 }
-
-void pieceRotate(Tetromino &tet, int rot) {
-    unsigned i = 0;
-    if (tet.type == I) {
-	while (map::chkCollision(tet, 
-		    getKickData(i, tet, rot, kick_data_I),
-		    rot)) {
-	    i++;
-	}
-    } else if (tet.type != O) {
-	while (map::chkCollision(tet,
-		    getKickData(i, tet, rot, kick_data),
-		    rot)) {
-	    i++;
-	}
-    }
+Position negative(Position old) {
+    return {-old.x, -old.y, -old.z};
 }
 
+Position getRotShift(Block b, unsigned i, Rotation newRot, Rotation rot) {
+    int iter = extract(newRot, rot);
+    Position retval;
+    if (b == Block::I) {
+	retval =  kick_data_I[i + TEST_COUNT * iter];
+    } else if (b != Block::O) {
+	retval = kick_data[i + TEST_COUNT * iter];
+    } else {
+	retval = {0, 0, 0};
+    }
+    if (newRot.isNegative()) {
+	return retval;
+    } else {
+	return negative(retval);
+    }
+}

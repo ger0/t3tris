@@ -50,6 +50,7 @@ void setPieces() {
 	pack = next;
 	next = new Pack(Block(var + 1), Pieces::piece[var]);
     }
+    printf("NEXT PIECE: %u\n", var + 1);
     canSwap = true;
 }
 // callbacks	-------------------------------------------------------
@@ -123,6 +124,7 @@ void keyCallback(GLFWwindow* wnd, int key, int scancode, int act, int mod) {
 		    buff = pack;
 		    setPieces();
 		} else {
+		    pack->resetPos();
 		    Pack *temp = pack;
 		    pack = buff;
 		    buff = temp;
@@ -214,7 +216,7 @@ void drawScene(GLFWwindow* window) {
     glUniformMatrix4fv(sp->u("P"), 1, false, glm::value_ptr(P));
     glUniformMatrix3fv(sp->u("cameraPos"), 1, false, glm::value_ptr(cameraPos));
 
-    drawGrid(sp, tex, pack->grid, NULL, pack);
+    drawGrid(sp, tex, pack->grid, pack);
     drawGrid(sp, tex, map::data);
     
     // swap buffers
