@@ -1,56 +1,27 @@
 #include "t3tris.hpp"
-const std::vector<std::vector<glm::vec3>> Pieces::piece {
-    // O
-    std::vector<glm::vec3> {
-	glm::vec3(1, 1, 2),
-	glm::vec3(2, 1, 2),
-	glm::vec3(1, 2, 2),
-	glm::vec3(2, 2, 2),
-	glm::vec3(1, 2, 1),
-	glm::vec3(2, 2, 1),
-	glm::vec3(1, 1, 1),
-	glm::vec3(2, 1, 1)
-    },
-    // I
-    std::vector<glm::vec3> {
-	glm::vec3(0, 2, 2),
-	glm::vec3(1, 2, 2),
-	glm::vec3(2, 2, 2),
-	glm::vec3(3, 2, 2)
-    },
-    // L
-    std::vector<glm::vec3> {
-	glm::vec3(1, 2, 2),
-	glm::vec3(2, 2, 2),
-	glm::vec3(3, 2, 2),
-	glm::vec3(3, 3, 2)
-    },
-    // J
-    std::vector<glm::vec3> {
-	glm::vec3(1, 2, 2),
-	glm::vec3(1, 3, 2),
-	glm::vec3(2, 2, 2),
-	glm::vec3(3, 2, 2)
-    },
-    // Z
-    std::vector<glm::vec3> {
-	glm::vec3(1, 3, 2),
-	glm::vec3(2, 3, 2),
-	glm::vec3(2, 2, 2),
-	glm::vec3(3, 2, 2)
-    },
-    // S
-    std::vector<glm::vec3> {
-	glm::vec3(1, 2, 2),
-	glm::vec3(2, 2, 2),
-	glm::vec3(2, 3, 2),
-	glm::vec3(3, 3, 2)
-    },
-    // T
-    std::vector<glm::vec3> {
-	glm::vec3(1, 2, 2),
-	glm::vec3(2, 2, 2),
-	glm::vec3(2, 1, 2),
-	glm::vec3(2, 2, 3)
+
+Position Position::operator+(Position a) {
+    return Position{
+	this->x + a.x,
+	this->y + a.y, 
+	this->z + a.z
+    };
+}
+
+// why?
+Position Position::operator%(int a) {
+    return Position{
+	(int)((unsigned)(this->x) % a),
+	(int)((unsigned)(this->y) % a), 
+	(int)((unsigned)(this->z) % a)
+    };
+}
+bool Position::isNegative() {
+    if (this->x < 0 
+	    || this ->y < 0 
+	    || this -> z < 0) {
+	return true;
+    } else {
+	return false;
     }
-};
+}

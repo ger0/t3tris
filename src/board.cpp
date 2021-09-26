@@ -7,41 +7,9 @@ inline unsigned getMapIndex(unsigned x, unsigned y, unsigned z) {
 }
 
 void map::initMap() {
-    /*
-    // bottom wall
-    for (unsigned z = 0; z < MAP_DEPTH; z++) {
-	for (unsigned x = 0; x < MAP_WIDTH; x++) {
-	    map::data[getMapIndex(x, 0, z)] = (byte)Block::WALL;
-	}
-    }
-    // side walls 
-    // x = 0 & x = max
-    for (unsigned z = 0; z < MAP_DEPTH; z++) {
-	for (unsigned y = 0; y < MAP_HEIGHT; y++) {
-	    map::data[getMapIndex(0, y, z)] = (byte)Block::WALL;
-	    map::data[getMapIndex(MAP_WIDTH - 1, y, z)] = (byte)Block::WALL;
-	}
-    }
-    // z = 0 & z = max
-    for (unsigned y = 0; y < MAP_HEIGHT; y++) {
-	for (unsigned x = 0; x < MAP_WIDTH; x++) {
-	    map::data[getMapIndex(x, y, 0)] = (byte)Block::WALL;
-	    map::data[getMapIndex(x, y, MAP_DEPTH - 1)] = (byte)Block::WALL;
-	}
-    }
-   // debug 
-    map::data[getMapIndex(1,0,1)] = Block::O;
-    map::data[getMapIndex(MAP_WIDTH - 2,MAP_HEIGHT - 1, MAP_DEPTH - 2)] = Block::I;
-    */
+    // temp
 }
 
-inline bool chkBND(Tetromino &tet, unsigned &x, unsigned &y, int rot = 0) {
-    if ((tet.data[y * BND_SIZE + x] >> unsigned(tet.rot + rot) % 4) & 1) {
-	return true;
-    }
-    else 
-	return false;
-}
 bool map::isColliding(Position pos) {
     if (pos.x >= MAP_WIDTH  || pos.x < 0 ||
 	    pos.y >= MAP_HEIGHT || pos.y < 0 ||
@@ -56,23 +24,6 @@ bool map::isColliding(Position pos) {
     } else {
 	return false;
     }
-}
-
-bool map::chkCollision(Tetromino &t, Position mov, int rot) { 
-    for (unsigned y = 0; y < BND_SIZE; y++) {
-	for (unsigned x = 0; x < BND_SIZE; x++) {
-	    if (chkBND(t, x, y, rot)) {
-		int coord = getMapIndex(x + t.pos.x + mov.x, y - (t.pos.y + mov.y), t.pos.z + mov.z);
-		if (map::data[coord] != Block::EMPTY) {
-		    return true;
-		}
-	    }
-	}
-    }
-    t.pos = t.pos + mov;
-    if (rot)
-	t.rot = unsigned(t.rot + rot) % 4;
-    return false;
 }
 // tutaj
 void map::lineCheck() {
@@ -114,17 +65,6 @@ void map::pushPiece(Block b, Position pos) {
     map::data[getMapIndex(pos.x, pos.y, pos.z)] = (byte)b;
 }
 
-void map::pushPiece(Tetromino &t) {
-    for (unsigned y = 0; y < BND_SIZE; y++) {
-	for (unsigned x = 0; x < BND_SIZE; x++) {
-	    if (chkBND(t, x, y)) {
-		map::data[getMapIndex(x + t.pos.x, y - t.pos.y, t.pos.z)] = (byte)t.type;
-	    }
-	}
-    }
-    lineCheck();
-}
-
 inline float* getTexCoords(unsigned type) {
     float *new_coords = (float*)malloc(sizeof(float) * 2 * vertCount);
 
@@ -136,7 +76,7 @@ inline float* getTexCoords(unsigned type) {
 }
 
 void drawGrid(ShaderProgram *sp, GLuint tex,
-	    byte grid[], Tetromino *tet, Pack *p) {
+	    byte grid[], Pack *p) {
     float x_shift = (MAP_WIDTH 	- 1) / 2.0f;
     float y_shift = (MAP_HEIGHT - 1) / 2.0f;
     float z_shift = (MAP_DEPTH  - 1) / 2.0f;

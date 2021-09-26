@@ -17,11 +17,7 @@ namespace map {
     bool	isColliding(Position pos);
     void	pushPiece(Block b, Position pos);
     void 	lineCheck();
-
-    void	pushPiece(Tetromino &tet);
-    bool	chkCollision(Tetromino &tet, Position mov, int rot);
 }
 
 // draws a grid 
-void drawGrid(ShaderProgram *sp, GLuint tex, byte grid[],
-	Tetromino *tet = NULL, Pack *p = NULL);
+void drawGrid(ShaderProgram *sp, GLuint tex, byte grid[], Pack *p = NULL);
